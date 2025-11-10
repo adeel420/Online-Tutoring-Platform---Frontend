@@ -100,10 +100,10 @@ const Home = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
+                className=" p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300"
               >
                 <div
-                  className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}
+                  className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6  transition-transform`}
                 >
                   <span className="text-3xl">{feature.icon}</span>
                 </div>

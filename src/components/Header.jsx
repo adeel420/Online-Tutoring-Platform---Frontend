@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -24,7 +25,7 @@ const Header = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <Link
-                to="#"
+                to="/"
                 className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
                 Home
@@ -51,10 +52,16 @@ const Header = () => {
 
             {/* Right Buttons (Desktop) */}
             <div className="hidden md:flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+              <button
+                onClick={() => navigate("/login")}
+                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+              >
                 Login
               </button>
-              <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+              <button
+                onClick={() => navigate("/signup")}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+              >
                 Sign Up
               </button>
             </div>
@@ -78,7 +85,7 @@ const Header = () => {
           <div className="md:hidden bg-white border-t border-gray-200 shadow-md">
             <div className="px-4 py-3 space-y-3">
               <Link
-                to="#"
+                to="/"
                 className="block text-gray-700 hover:text-purple-600 font-medium"
               >
                 Home
@@ -103,10 +110,16 @@ const Header = () => {
               </Link>
 
               <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">
-                <button className="w-full text-left text-gray-700 hover:text-purple-600 font-medium">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="w-full text-left text-gray-700 hover:text-purple-600 font-medium"
+                >
                   Login
                 </button>
-                <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-full font-medium hover:shadow-lg transition-all">
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-full font-medium hover:shadow-lg transition-all"
+                >
                   Sign Up
                 </button>
               </div>
