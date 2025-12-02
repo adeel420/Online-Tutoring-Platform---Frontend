@@ -31,19 +31,19 @@ const Header = () => {
                 Home
               </Link>
               <Link
-                to="#"
+                to="/about"
                 className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
                 About
               </Link>
               <Link
-                to="#"
+                to="/contact"
                 className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
                 Contact
               </Link>
               <Link
-                to="#"
+                to="/services"
                 className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
                 Services
@@ -54,13 +54,13 @@ const Header = () => {
             <div className="hidden md:flex items-center space-x-4">
               <button
                 onClick={() => navigate("/login")}
-                className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
+                className="text-gray-700 hover:text-purple-600 font-medium transition-colors cursor-pointer"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate("/signup")}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all cursor-pointer"
               >
                 Sign Up
               </button>
@@ -91,19 +91,19 @@ const Header = () => {
                 Home
               </Link>
               <Link
-                to="#"
+                to="/about"
                 className="block text-gray-700 hover:text-purple-600 font-medium"
               >
                 About
               </Link>
               <Link
-                to="#"
+                to="/contact"
                 className="block text-gray-700 hover:text-purple-600 font-medium"
               >
                 Contact
               </Link>
               <Link
-                to="#"
+                to="/services"
                 className="block text-gray-700 hover:text-purple-600 font-medium"
               >
                 Services
@@ -112,13 +112,13 @@ const Header = () => {
               <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">
                 <button
                   onClick={() => navigate("/login")}
-                  className="w-full text-left text-gray-700 hover:text-purple-600 font-medium"
+                  className="w-full text-left text-gray-700 hover:text-purple-600 font-medium cursor-pointer"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => navigate("/signup")}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-full font-medium hover:shadow-lg transition-all"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-full font-medium hover:shadow-lg transition-all cursor-pointer"
                 >
                   Sign Up
                 </button>

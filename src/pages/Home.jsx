@@ -1,5 +1,6 @@
 import React from "react";
-import { featuredTutors, features } from "../data/Data";
+import { featuredTutors, features, servicesSubjects } from "../data/Data";
+import Chatbot from "../components/chatbot/Chatbot";
 
 const Home = () => {
   const subjects = [
@@ -189,15 +190,19 @@ const Home = () => {
               Master any subject with our expert tutors
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {subjects.map((subject, index) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+            {servicesSubjects.map((subject, index) => (
               <div
                 key={index}
-                className="group p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 text-center border border-gray-100"
+                className="bg-white rounded-2xl shadow-md hover:shadow-xl p-5 sm:p-6 text-center hover:-translate-y-2 transition-all duration-300 cursor-pointer"
               >
-                <h3 className="font-semibold text-gray-800 group-hover:text-purple-600 transition-colors">
-                  {subject}
-                </h3>
+                <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">
+                  {subject.icon}
+                </div>
+                <h3 className="font-bold">{subject.name}</h3>
+                <p className="text-sm text-purple-600 font-medium">
+                  {subject.tutors} Tutors
+                </p>
               </div>
             ))}
           </div>
@@ -230,6 +235,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 };
