@@ -221,14 +221,6 @@ const About = () => {
                 </span>
               </span>
             </button>
-            <button className="group border-2 border-white text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-white hover:text-purple-900 transform hover:-translate-y-1 transition-all duration-300">
-              <span className="flex items-center justify-center space-x-2">
-                <span>Become a Tutor</span>
-                <span className="group-hover:translate-x-1 transition-transform">
-                  🎯
-                </span>
-              </span>
-            </button>
           </div>
         </div>
       </section>

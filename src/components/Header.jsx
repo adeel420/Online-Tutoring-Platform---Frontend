@@ -43,10 +43,10 @@ const Header = () => {
                 Contact
               </Link>
               <Link
-                to="/services"
+                to="/tutors"
                 className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
               >
-                Services
+                Tutors
               </Link>
             </div>
 
@@ -103,10 +103,10 @@ const Header = () => {
                 Contact
               </Link>
               <Link
-                to="/services"
+                to="/tutors"
                 className="block text-gray-700 hover:text-purple-600 font-medium"
               >
-                Services
+                Tutors
               </Link>
 
               <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">

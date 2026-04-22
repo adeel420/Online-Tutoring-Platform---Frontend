@@ -45,13 +45,6 @@ const Home = () => {
                 <span className=" transition-transform">🚀</span>
               </span>
             </button>
-
-            <button className="group w-full sm:w-auto border-2 border-white text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-lg hover:bg-white hover:text-purple-900 transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-              <span className="flex items-center justify-center space-x-2">
-                <span>Become a Tutor</span>
-                <span className="transition-transform">💼</span>
-              </span>
-            </button>
           </div>
         </div>
       </section>
@@ -224,12 +217,6 @@ const Home = () => {
               <span className="flex items-center justify-center space-x-2">
                 <span>Start Learning Now</span>
                 <span className="">🎓</span>
-              </span>
-            </button>
-            <button className="group w-full sm:w-auto border-2 border-white text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-lg hover:bg-white hover:text-purple-900 transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-              <span className="flex items-center justify-center space-x-2">
-                <span>Free Trial</span>
-                <span className="">✨</span>
               </span>
             </button>
           </div>
