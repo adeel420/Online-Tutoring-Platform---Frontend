@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { pendingTutors } from "../../data/Data";
 
 const Tutor_Verification = () => {
@@ -9,6 +11,26 @@ const Tutor_Verification = () => {
 
   const updateStatus = (id, status) =>
     setTutors((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
+
+  const handleApprove = async (tutor) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/user/approve-teacher/${tutor._id || tutor.id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      updateStatus(tutor.id, "approved");
+      toast.success(`${tutor.name} has been approved! Approval email sent. ✅`);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Approval failed.");
+    }
+  };
+
+  const handleReject = (tutor) => {
+    updateStatus(tutor.id, "rejected");
+    toast.success(`${tutor.name} has been rejected.`);
+  };
 
   const pending = tutors.filter((t) => t.status === "pending");
   const approved = tutors.filter((t) => t.status === "approved");
@@ -80,13 +102,13 @@ const Tutor_Verification = () => {
                   {tutor.status === "pending" && (
                     <>
                       <button
-                        onClick={() => updateStatus(tutor.id, "approved")}
+                        onClick={() => handleApprove(tutor)}
                         className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-200 transition-all cursor-pointer"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => updateStatus(tutor.id, "rejected")}
+                        onClick={() => handleReject(tutor)}
                         className="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-200 transition-all cursor-pointer"
                       >
                         Reject

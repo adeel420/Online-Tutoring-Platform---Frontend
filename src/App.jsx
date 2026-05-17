@@ -1,4 +1,5 @@
 import { Route, Routes, useLocation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import "./App.css";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -7,6 +8,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Tutors from "./pages/Tutors";
 import Admin_Dashboard from "./pages/Dashboards/Admin_Dashboard";
 import Tutor_Dashboard from "./pages/Dashboards/Tutor_Dashboard";
@@ -18,6 +22,9 @@ function App() {
   const hidePaths = [
     "/login",
     "/signup",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
     "/admin_dashboard",
     "/tutor_dashboard",
     "/student_dashboard",
@@ -26,6 +33,15 @@ function App() {
   const hideHeaderFooter = hidePaths.includes(location.pathname);
   return (
     <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: { borderRadius: "12px", fontWeight: "500", fontSize: "14px" },
+          success: { style: { background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" } },
+          error: { style: { background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca" } },
+        }}
+      />
       {!hideHeaderFooter && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -34,6 +50,9 @@ function App() {
         <Route path="/tutors" element={<Tutors />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin_dashboard" element={<Admin_Dashboard />} />
         <Route path="/tutor_dashboard" element={<Tutor_Dashboard />} />
         <Route path="/student_dashboard" element={<Student_Dashboard />} />

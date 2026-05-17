@@ -1,48 +1,73 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import Loader from "../components/Loader";
+
+const roles = [
+  {
+    id: "student",
+    label: "Student",
+    icon: "🎓",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: "tutor",
+    label: "Teacher",
+    icon: "👨🏫",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    id: "admin",
+    label: "Admin",
+    icon: "⚙️",
+    color: "from-green-500 to-emerald-500",
+  },
+];
 
 const Login = () => {
+  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  const roles = [
-    {
-      id: "student",
-      label: "Student",
-      icon: "🎓",
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      id: "teacher",
-      label: "Teacher",
-      icon: "👨‍🏫",
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      id: "admin",
-      label: "Admin",
-      icon: "⚙️",
-      color: "from-green-500 to-emerald-500",
-    },
-  ];
+  const handleInputChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login:", { role: selectedRole, ...formData });
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_SERVER_API}/user/login`,
+        {
+          ...formData,
+          role: selectedRole,
+        },
+      );
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome back, ${data.user.name}! 👋`);
+      setTimeout(() => {
+        if (data.user.role === "admin") navigate("/admin_dashboard");
+        else if (data.user.role === "tutor") navigate("/tutor_dashboard");
+        else navigate("/student_dashboard");
+      }, 1000);
+    } catch (err) {
+      const msg =
+        err.response?.data?.error || "Login failed. Please try again.";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const activeRole = roles.find((r) => r.id === selectedRole);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+      {loading && <Loader fullScreen />}
+
       <div className="relative bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -66,9 +91,9 @@ const Login = () => {
                     key={role.id}
                     type="button"
                     onClick={() => setSelectedRole(role.id)}
-                    className="group p-4 border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                    className="group p-4 border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                   >
-                    <div className="flex items-center space-x-4 cursor-pointer">
+                    <div className="flex items-center space-x-4">
                       <div
                         className={`w-12 h-12 bg-gradient-to-r ${role.color} rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}
                       >
@@ -86,16 +111,14 @@ const Login = () => {
             <>
               <div className="text-center mb-6">
                 <div
-                  className={`w-16 h-16 bg-gradient-to-r ${
-                    roles.find((r) => r.id === selectedRole)?.color
-                  } rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl`}
+                  className={`w-16 h-16 bg-gradient-to-r ${activeRole?.color} rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl`}
                 >
-                  {roles.find((r) => r.id === selectedRole)?.icon}
+                  {activeRole?.icon}
                 </div>
                 <p className="text-gray-600">
                   Signing in as{" "}
                   <span className="font-semibold text-purple-600">
-                    {roles.find((r) => r.id === selectedRole)?.label}
+                    {activeRole?.label}
                   </span>
                 </p>
                 <button
@@ -137,9 +160,9 @@ const Login = () => {
                 />
               </div>
 
-              <div className="text-right mb-4">
+              <div className="text-right">
                 <Link
-                  to="#"
+                  to="/forgot-password"
                   className="text-sm text-purple-600 hover:text-purple-800"
                 >
                   Forget your password?
@@ -148,9 +171,16 @@ const Login = () => {
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                Sign In
+                {loading ? (
+                  <>
+                    <Loader size={20} color="#fff" /> Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </>
           )}

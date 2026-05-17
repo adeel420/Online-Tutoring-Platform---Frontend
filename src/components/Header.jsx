@@ -1,11 +1,52 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
+import { Popover } from "antd";
+import { MdDashboard } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
+import { MdLogout } from "react-icons/md";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+  const handleLogout = () => {
+    handleSuccess("Logout Successfuly");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setTimeout(() => {
+      navigate("/login");
+    }, 1000);
+  };
+
+  const content = (
+    <div className="w-[150px] ">
+      {user?.role === "student" && (
+        <a
+          href={`${user.role === "student" ? "/student_dashboard" : "" || user.role === "tutor" ? "/tutor_dashboard" : "" || user.role === "admin" ? "/admin_dashboard" : ""}`}
+          style={{ color: "black" }}
+          className="dash-link hover:bg-[#ccc] p-2 cursor-pointer text-black flex gap-2 items-center text-[18px] font-semibold rounded "
+        >
+          <MdDashboard /> Dashboard
+        </a>
+      )}
+      <li
+        // onClick={handlePopup}
+        style={{ color: "black" }}
+        className="dash-link hover:bg-[#ccc] p-2 cursor-pointer text-black flex gap-2 items-center text-[18px] font-semibold rounded "
+      >
+        <FaUser /> Profile
+      </li>
+      <li
+        className="hover:bg-[#ccc] p-2 cursor-pointer flex gap-2 items-center text-[18px] font-semibold rounded "
+        onClick={handleLogout}
+      >
+        <MdLogout /> Logout
+      </li>
+    </div>
+  );
   return (
     <>
       {/* Navigation */}
@@ -51,20 +92,42 @@ const Header = () => {
             </div>
 
             {/* Right Buttons (Desktop) */}
-            <div className="hidden md:flex items-center space-x-4">
-              <button
-                onClick={() => navigate("/login")}
-                className="text-gray-700 hover:text-purple-600 font-medium transition-colors cursor-pointer"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => navigate("/signup")}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all cursor-pointer"
-              >
-                Sign Up
-              </button>
-            </div>
+            {token ? (
+              <div className="hidden md:flex items-center space-x-4">
+                {user?.profile ? (
+                  <Popover content={content} trigger="click">
+                    <img
+                      src={user?.profile}
+                      className="h-[45px] w-[45px] rounded-full cursor-pointer hover:shadow-lg transform hover:-translate-y-0.5 transition-all cursor-pointer"
+                      alt=""
+                    />
+                  </Popover>
+                ) : (
+                  <Popover
+                    content={content}
+                    trigger="click"
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white h-[45px] w-[45px] rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all cursor-pointer"
+                  >
+                    {user?.name?.charAt(0)}
+                  </Popover>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center space-x-4">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors cursor-pointer"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all cursor-pointer"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button
