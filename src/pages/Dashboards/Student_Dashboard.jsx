@@ -25,8 +25,10 @@ const Student_Dashboard = () => {
   const [activeBtn, setActiveBtn] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const ActiveComponent = tabs[activeBtn];
   const { badges, markSeen } = useNotifications();
   const tabKeys = {
@@ -137,7 +139,7 @@ const Student_Dashboard = () => {
         </div>
 
         <div className="p-4 md:p-6 lg:p-8">
-          <ActiveComponent setActiveTab={setActiveBtn} />
+          <ActiveComponent setActiveTab={setActiveBtn} onProfileUpdate={setUser} />
         </div>
       </main>
 
