@@ -11,6 +11,9 @@ export const getSocket = () => {
       auth: { token },
       transports: ["websocket", "polling"],
     });
+  } else if (!socket.connected) {
+    socket.auth = { token };
+    socket.connect();
   }
 
   return socket;

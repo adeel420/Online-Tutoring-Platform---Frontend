@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import Loader from "../Loader";
 import { getSocket } from "../../utils/socket";
 
-const RealtimeChat = ({ role, peerId, peerName, bookingId, classSessionId, compact = false }) => {
+const RealtimeChat = ({ peerId, peerName, bookingId, classSessionId, compact = false }) => {
   const [conversations, setConversations] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -81,6 +81,11 @@ const RealtimeChat = ({ role, peerId, peerName, bookingId, classSessionId, compa
   const sendMessage = () => {
     if (!input.trim() || !selected?.peerId) return;
     const socket = getSocket();
+    if (!socket) {
+      toast.error("Chat is not connected. Please login again.");
+      return;
+    }
+
     socket?.emit(
       "chat:send",
       {

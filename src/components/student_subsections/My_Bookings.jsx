@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
+import { formatTimeRange12 } from "../../utils/time";
 
 const statusStyle = {
   pending_payment: "bg-orange-100 text-orange-600",
@@ -113,7 +114,9 @@ const My_Bookings = () => {
                     </td>
                     <td className="px-5 py-4 text-gray-500">
                       <p>{session.date}</p>
-                      <p className="text-xs text-gray-400">{session.time}</p>
+                      <p className="text-xs text-gray-400">
+                        {formatTimeRange12(session.from, session.to, session.time)}
+                      </p>
                     </td>
                     <td className="px-5 py-4 font-semibold text-gray-800">
                       {session.amount}

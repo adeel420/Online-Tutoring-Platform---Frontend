@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
+import { formatTimeRange12 } from "../../utils/time";
 
 const normalizeTutor = (tutor, index = 0) => ({
   id: tutor._id || tutor.id || index,
@@ -21,6 +22,9 @@ const normalizeTutor = (tutor, index = 0) => ({
       : [tutor.subject || "Tutoring"],
   reviews: Array.isArray(tutor.reviews) ? tutor.reviews : [],
   profile: tutor.profile || tutor.image || "",
+  availabilitySlots: Array.isArray(tutor.availabilitySlots)
+    ? tutor.availabilitySlots
+    : [],
 });
 
 const Find_Tutors = () => {
@@ -30,6 +34,8 @@ const Find_Tutors = () => {
   const [selected, setSelected] = useState(null);
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookingSlotId, setBookingSlotId] = useState("");
+  const [booking, setBooking] = useState(false);
 
   useEffect(() => {
     const fetchTutors = async () => {
@@ -47,6 +53,31 @@ const Find_Tutors = () => {
 
     fetchTutors();
   }, []);
+
+  const handleBookSlot = async () => {
+    if (!selected || !bookingSlotId) {
+      toast.error("Please select an available time slot.");
+      return;
+    }
+
+    setBooking(true);
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_SERVER_API}/user/tutors/${selected.id}/bookings`,
+        { slotId: bookingSlotId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast.success(data.message || "Booking created.");
+      setSelected(null);
+      setBookingSlotId("");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Booking failed.");
+    } finally {
+      setBooking(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     return tutors
@@ -185,6 +216,10 @@ const Find_Tutors = () => {
                   </button>
                   <button
                     disabled={!tutor.available}
+                    onClick={() => {
+                      setSelected(tutor);
+                      setBookingSlotId("");
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       tutor.available
                         ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-md cursor-pointer"
@@ -259,19 +294,50 @@ const Find_Tutors = () => {
                 </span>
               ))}
             </div>
+            <div className="mb-5">
+              <p className="text-xs font-semibold text-gray-500 mb-2">
+                Available Time
+              </p>
+              {selected.availabilitySlots.length === 0 ? (
+                <p className="text-sm text-gray-400">No open slots right now.</p>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 max-h-44 overflow-y-auto">
+                  {selected.availabilitySlots.map((slot) => (
+                    <button
+                      key={slot._id}
+                      onClick={() => setBookingSlotId(slot._id)}
+                      className={`text-left rounded-xl border px-3 py-2 transition-all cursor-pointer ${
+                        bookingSlotId === slot._id
+                          ? "border-purple-500 bg-purple-50 text-purple-700"
+                          : "border-gray-100 bg-gray-50 text-gray-600 hover:border-purple-200"
+                      }`}
+                    >
+                      <span className="block text-sm font-semibold">{slot.day}</span>
+                      <span className="text-xs">
+                        {formatTimeRange12(slot.from, slot.to)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex gap-3">
               <button
-                disabled={!selected.available}
+                onClick={handleBookSlot}
+                disabled={!selected.available || !bookingSlotId || booking}
                 className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all ${
-                  selected.available
+                  selected.available && bookingSlotId && !booking
                     ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg cursor-pointer"
                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                Book Session
+                {booking ? "Booking..." : "Book Session"}
               </button>
               <button
-                onClick={() => setSelected(null)}
+                onClick={() => {
+                  setSelected(null);
+                  setBookingSlotId("");
+                }}
                 className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all cursor-pointer"
               >
                 Close

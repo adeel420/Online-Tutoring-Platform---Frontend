@@ -3,11 +3,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
 import VideoClassRoom from "../video/VideoClassRoom";
+import { formatTimeRange12, getSessionWindow } from "../../utils/time";
 
 const Join_Session = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeBooking, setActiveBooking] = useState(null);
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -26,6 +28,11 @@ const Join_Session = () => {
     };
 
     fetchBookings();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
   }, []);
 
   const upcoming = bookings.filter(
@@ -70,28 +77,44 @@ const Join_Session = () => {
           </p>
         ) : (
           <div className="space-y-3">
-            {upcoming.map((session) => (
-              <div
-                key={session.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100"
-              >
-                <div className="w-11 h-11 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                  {session.tutor?.[0] || "T"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-800">{session.tutor}</p>
-                  <p className="text-xs text-gray-500">
-                    {session.subject} | {session.date} | {session.time}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveBooking(session)}
-                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl text-sm font-bold hover:shadow-md transition-all cursor-pointer flex-shrink-0"
+            {upcoming.map((session) => {
+              const windowStatus = getSessionWindow(session, now);
+              const canJoin = windowStatus.state === "open";
+
+              return (
+                <div
+                  key={session.id}
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100"
                 >
-                  Join Class
-                </button>
-              </div>
-            ))}
+                  <div className="w-11 h-11 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+                    {session.tutor?.[0] || "T"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800">{session.tutor}</p>
+                    <p className="text-xs text-gray-500">
+                      {session.subject} | {session.date} |{" "}
+                      {formatTimeRange12(session.from, session.to, session.time)}
+                    </p>
+                    {!canJoin && (
+                      <p className="text-xs font-semibold text-orange-500 mt-1">
+                        {windowStatus.label}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setActiveBooking(session)}
+                    disabled={!canJoin}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
+                      canJoin
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-md cursor-pointer"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    {canJoin ? "Join Class" : windowStatus.label}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

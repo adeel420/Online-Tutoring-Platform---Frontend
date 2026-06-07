@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
+import { formatTimeRange12, fromTime24, toTime24 } from "../../utils/time";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const HOURS = Array.from({ length: 12 }, (_, index) => String(index + 1));
+const MINUTES = ["00", "15", "30", "45"];
+const PERIODS = ["AM", "PM"];
 
 const defaultForm = { day: "Monday", from: "09:00", to: "10:00" };
 
@@ -37,6 +41,16 @@ const Availability_Schedule = () => {
 
   const handleChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handleTimeChange = (field, part, value) => {
+    setForm((previous) => {
+      const timeParts = fromTime24(previous[field]);
+      return {
+        ...previous,
+        [field]: toTime24({ ...timeParts, [part]: value }),
+      };
+    });
+  };
 
   const saveSlots = async (nextSlots, successMessage) => {
     setSaving(true);
@@ -146,23 +160,67 @@ const Availability_Schedule = () => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">From</label>
-              <input
-                type="time"
-                name="from"
-                value={form.from}
-                onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
+              <div className="grid grid-cols-3 gap-2">
+                <select
+                  value={fromTime24(form.from).hour}
+                  onChange={(event) => handleTimeChange("from", "hour", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {HOURS.map((hour) => (
+                    <option key={hour}>{hour}</option>
+                  ))}
+                </select>
+                <select
+                  value={fromTime24(form.from).minute}
+                  onChange={(event) => handleTimeChange("from", "minute", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {MINUTES.map((minute) => (
+                    <option key={minute}>{minute}</option>
+                  ))}
+                </select>
+                <select
+                  value={fromTime24(form.from).period}
+                  onChange={(event) => handleTimeChange("from", "period", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {PERIODS.map((period) => (
+                    <option key={period}>{period}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">To</label>
-              <input
-                type="time"
-                name="to"
-                value={form.to}
-                onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
+              <div className="grid grid-cols-3 gap-2">
+                <select
+                  value={fromTime24(form.to).hour}
+                  onChange={(event) => handleTimeChange("to", "hour", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {HOURS.map((hour) => (
+                    <option key={hour}>{hour}</option>
+                  ))}
+                </select>
+                <select
+                  value={fromTime24(form.to).minute}
+                  onChange={(event) => handleTimeChange("to", "minute", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {MINUTES.map((minute) => (
+                    <option key={minute}>{minute}</option>
+                  ))}
+                </select>
+                <select
+                  value={fromTime24(form.to).period}
+                  onChange={(event) => handleTimeChange("to", "period", event.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {PERIODS.map((period) => (
+                    <option key={period}>{period}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
           <div className="flex gap-3 mt-4">
@@ -225,7 +283,7 @@ const Availability_Schedule = () => {
                             slot.isBooked ? "text-gray-500" : "text-purple-700"
                           }`}
                         >
-                          {slot.from} - {slot.to}
+                          {formatTimeRange12(slot.from, slot.to)}
                         </span>
                         {slot.isBooked && (
                           <span className="ml-2 text-xs font-semibold text-blue-600">

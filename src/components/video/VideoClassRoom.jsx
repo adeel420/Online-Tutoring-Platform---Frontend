@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
 import RealtimeChat from "../chat/RealtimeChat";
+import { getSessionWindow } from "../../utils/time";
 
 const getIceServers = () => {
   const turnUrl = import.meta.env.VITE_TURN_URL;
@@ -433,7 +434,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
       });
   };
 
-  const leaveClass = async () => {
+  const leaveClass = useCallback(async () => {
     try {
       if (session?._id) {
         await axios.put(
@@ -447,7 +448,19 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
     } finally {
       onLeave?.();
     }
-  };
+  }, [apiUrl, onLeave, session?._id, token]);
+
+  useEffect(() => {
+    const windowStatus = getSessionWindow(booking);
+    if (windowStatus.state !== "open" || !windowStatus.remainingMs) return undefined;
+
+    const timer = setTimeout(() => {
+      toast("Class time ended.");
+      leaveClass();
+    }, Math.max(windowStatus.remainingMs, 1000));
+
+    return () => clearTimeout(timer);
+  }, [booking, leaveClass, session?._id]);
 
   if (loading) {
     return (
@@ -577,8 +590,16 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
       <RealtimeChat
         compact
         role={role}
-        peerId={isTutor ? booking.studentId : booking.tutorId}
-        peerName={isTutor ? booking.student : booking.tutor}
+        peerId={
+          isTutor
+            ? booking.studentId || session?.student?._id
+            : booking.tutorId || session?.tutor?._id
+        }
+        peerName={
+          isTutor
+            ? booking.student || session?.student?.name
+            : booking.tutor || session?.tutor?.name
+        }
         bookingId={booking.id}
         classSessionId={session?._id}
       />
