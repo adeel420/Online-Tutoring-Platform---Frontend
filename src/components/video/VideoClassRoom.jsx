@@ -71,6 +71,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
   const remoteVideoRef = useRef(null);
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
   const audioSenderRef = useRef(null);
   const videoSenderRef = useRef(null);
   const seenCandidatesRef = useRef(new Set());
@@ -239,6 +240,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
 
         peer.ontrack = (event) => {
           const [remoteStream] = event.streams;
+          remoteStreamRef.current = remoteStream || null;
           if (remoteVideoRef.current && remoteStream) {
             remoteVideoRef.current.srcObject = remoteStream;
           }
@@ -304,6 +306,16 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
     const timer = setInterval(() => setElapsed((prev) => prev + 1), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!loading && localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+
+    if (!loading && remoteVideoRef.current && remoteStreamRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+    }
+  }, [loading]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
