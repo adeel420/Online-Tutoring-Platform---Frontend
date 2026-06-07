@@ -29,6 +29,10 @@ const Signup = () => {
     email: "",
     phone: "",
     password: "",
+    bankName: "",
+    accountTitle: "",
+    accountNumber: "",
+    iban: "",
   });
   const [profilePic, setProfilePic] = useState(null);
   const [profilePreview, setProfilePreview] = useState(null);
@@ -61,6 +65,17 @@ const Signup = () => {
       return;
     }
 
+    if (
+      selectedRole === "teacher" &&
+      (!formData.bankName.trim() ||
+        !formData.accountTitle.trim() ||
+        !formData.accountNumber.trim() ||
+        !formData.iban.trim())
+    ) {
+      toast.error("Please enter complete bank details.");
+      return;
+    }
+
     setLoading(true);
     try {
       const data = new FormData();
@@ -69,6 +84,12 @@ const Signup = () => {
       data.append("phone", formData.phone);
       data.append("password", formData.password);
       data.append("role", selectedRole === "teacher" ? "tutor" : "student");
+      if (selectedRole === "teacher") {
+        data.append("bankName", formData.bankName);
+        data.append("accountTitle", formData.accountTitle);
+        data.append("accountNumber", formData.accountNumber);
+        data.append("iban", formData.iban);
+      }
       if (profilePic) data.append("profile", profilePic);
       if (nationalId) data.append("cnic", nationalId);
       if (experienceLetter) data.append("experienceLetter", experienceLetter);
@@ -78,7 +99,11 @@ const Signup = () => {
         data,
       );
       toast.success(res.message || "Account created! Check your email.");
-      setTimeout(() => navigate("/verify-email"), 2500);
+      if (selectedRole === "teacher") {
+        setTimeout(() => navigate("/login"), 2500);
+      } else {
+        setTimeout(() => navigate("/verify-email"), 2500);
+      }
     } catch (err) {
       const msg =
         err.response?.data?.error || "Signup failed. Please try again.";
@@ -316,6 +341,53 @@ const Signup = () => {
                       </label>
                     )}
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Teacher Bank Details */}
+          {selectedRole === "teacher" && (
+            <div className="space-y-4 pt-2 border-t border-gray-100">
+              <p className="text-sm font-semibold text-purple-700">
+                Bank Details
+              </p>
+
+              {[
+                {
+                  label: "Bank Name",
+                  name: "bankName",
+                  placeholder: "Enter bank name",
+                },
+                {
+                  label: "Account Title",
+                  name: "accountTitle",
+                  placeholder: "Enter account holder name",
+                },
+                {
+                  label: "Account Number",
+                  name: "accountNumber",
+                  placeholder: "Enter account number",
+                },
+                {
+                  label: "IBAN",
+                  name: "iban",
+                  placeholder: "Enter IBAN",
+                },
+              ].map((f) => (
+                <div key={f.name}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {f.label} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name={f.name}
+                    value={formData[f.name]}
+                    onChange={handleInputChange}
+                    placeholder={f.placeholder}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  />
                 </div>
               ))}
             </div>

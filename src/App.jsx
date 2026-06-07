@@ -15,6 +15,7 @@ import Tutors from "./pages/Tutors";
 import Admin_Dashboard from "./pages/Dashboards/Admin_Dashboard";
 import Tutor_Dashboard from "./pages/Dashboards/Tutor_Dashboard";
 import Student_Dashboard from "./pages/Dashboards/Student_Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   const location = useLocation();
@@ -31,6 +32,7 @@ function App() {
   ];
 
   const hideHeaderFooter = hidePaths.includes(location.pathname);
+
   return (
     <>
       <Toaster
@@ -39,23 +41,47 @@ function App() {
           duration: 3000,
           style: { borderRadius: "12px", fontWeight: "500", fontSize: "14px" },
           success: { style: { background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" } },
-          error: { style: { background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca" } },
+          error:   { style: { background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca" } },
         }}
       />
       {!hideHeaderFooter && <Header />}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/tutors" element={<Tutors />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
+        {/* Public routes */}
+        <Route path="/"               element={<Home />} />
+        <Route path="/about"          element={<About />} />
+        <Route path="/contact"        element={<Contact />} />
+        <Route path="/tutors"         element={<Tutors />} />
+        <Route path="/login"          element={<Login />} />
+        <Route path="/signup"         element={<Signup />} />
+        <Route path="/verify-email"   element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/admin_dashboard" element={<Admin_Dashboard />} />
-        <Route path="/tutor_dashboard" element={<Tutor_Dashboard />} />
-        <Route path="/student_dashboard" element={<Student_Dashboard />} />
+
+        {/* Private routes */}
+        <Route
+          path="/admin_dashboard"
+          element={
+            <PrivateRoute allowedRoles={["admin"]}>
+              <Admin_Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tutor_dashboard"
+          element={
+            <PrivateRoute allowedRoles={["tutor"]}>
+              <Tutor_Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/student_dashboard"
+          element={
+            <PrivateRoute allowedRoles={["student"]}>
+              <Student_Dashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </>

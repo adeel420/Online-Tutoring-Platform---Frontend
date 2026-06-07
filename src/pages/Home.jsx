@@ -1,8 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { featuredTutors, features, servicesSubjects } from "../data/Data";
 import Chatbot from "../components/chatbot/Chatbot";
 
+const normalizeFeaturedTutor = (tutor) => ({
+  name: tutor.name || "Tutor",
+  subject: tutor.subject || "Subject not added",
+  rating: tutor.rating || 4.5,
+  students: tutor.students || 0,
+  experience: tutor.experience || "Experience not added",
+  image: tutor.profile || tutor.image || "",
+});
+
 const Home = () => {
+  const [homeTutors, setHomeTutors] = useState(featuredTutors);
+
+  useEffect(() => {
+    const fetchTutors = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_API}/user/tutors`);
+        if (data.length) {
+          setHomeTutors(data.slice(0, 3).map(normalizeFeaturedTutor));
+        }
+      } catch (err) {
+        setHomeTutors(featuredTutors);
+      }
+    };
+
+    fetchTutors();
+  }, []);
+
   const subjects = [
     "Mathematics",
     "Physics",
@@ -128,7 +155,7 @@ const Home = () => {
 
           {/* Tutors Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredTutors.map((tutor, index) => (
+            {homeTutors.map((tutor, index) => (
               <div
                 key={index}
                 className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 overflow-hidden flex flex-col"
@@ -136,11 +163,17 @@ const Home = () => {
                 <div className="p-8 flex flex-col flex-1 text-center">
                   {/* Tutor Image */}
                   <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-6">
-                    <img
-                      src={tutor.image}
-                      alt={tutor.name}
-                      className="w-full h-full object-cover rounded-full "
-                    />
+                    {tutor.image ? (
+                      <img
+                        src={tutor.image}
+                        alt={tutor.name}
+                        className="w-full h-full object-cover rounded-full "
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                        {tutor.name[0]}
+                      </div>
+                    )}
                   </div>
 
                   {/* Tutor Info */}

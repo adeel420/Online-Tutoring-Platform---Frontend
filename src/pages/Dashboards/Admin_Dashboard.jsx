@@ -10,6 +10,8 @@ import Complaints from "../../components/admin_subsections/Complaints";
 import Reviews_Ratings from "../../components/admin_subsections/Reviews_Ratings";
 import Analytics from "../../components/admin_subsections/Analytics";
 import Payments from "../../components/admin_subsections/Payments";
+import Admin_Profile from "../../components/admin_subsections/Admin_Profile";
+import useNotifications from "../../hooks/useNotifications";
 
 const tabs = [
   Dashboard,
@@ -20,15 +22,31 @@ const tabs = [
   Reviews_Ratings,
   Analytics,
   Payments,
+  Admin_Profile,
 ];
 
 const Admin_Dashboard = () => {
   const [activeBtn, setActiveBtn] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
   const navigate = useNavigate();
 
   const ActiveComponent = tabs[activeBtn];
+  const { badges, markSeen } = useNotifications();
+  const tabKeys = {
+    1: "users",
+    2: "tutors",
+    3: "sessions",
+    7: "payments",
+    5: "reviews",
+  };
+
+  const handleProfileUpdate = (updatedUser) => {
+    setUser(updatedUser);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -67,6 +85,7 @@ const Admin_Dashboard = () => {
               onClick={() => {
                 setActiveBtn(tab.id);
                 setSidebarOpen(false);
+                markSeen(tabKeys[tab.id]);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 activeBtn === tab.id
@@ -75,7 +94,12 @@ const Admin_Dashboard = () => {
               }`}
             >
               <span className="text-base">{tab.icon}</span>
-              {tab.title}
+              <span className="flex-1 text-left">{tab.title}</span>
+              {badges[tabKeys[tab.id]] > 0 && (
+                <span className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                  {badges[tabKeys[tab.id]]}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -110,15 +134,23 @@ const Admin_Dashboard = () => {
             </h2>
             <p className="text-xs text-gray-500">TutorHub Admin Panel</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
-              A
+          {user?.profile ? (
+            <div>
+              <img
+                src={user?.profile}
+                className="h-[45px] w-[45px] rounded-full "
+                alt=""
+              />
             </div>
-          </div>
+          ) : (
+            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
+              {user?.name?.charAt(0)?.toUpperCase()}
+            </div>
+          )}
         </div>
 
         <div className="p-4 md:p-6 lg:p-8">
-          <ActiveComponent />
+          <ActiveComponent onProfileUpdate={handleProfileUpdate} />
         </div>
       </main>
 

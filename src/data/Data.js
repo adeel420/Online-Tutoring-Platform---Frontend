@@ -300,12 +300,13 @@ export const servicesPlans = [
 export const adminTabs = [
   { id: 0, title: "Dashboard", icon: "📊" },
   { id: 1, title: "Manage Users", icon: "👥" },
-  { id: 2, title: "Tutor Verification", icon: "✅" },
+  { id: 2, title: "Find Tutors", icon: "👨‍🏫" },
   { id: 3, title: "Sessions", icon: "📅" },
   { id: 4, title: "Complaints", icon: "🚨" },
   { id: 5, title: "Reviews & Ratings", icon: "⭐" },
   { id: 6, title: "Analytics", icon: "📈" },
   { id: 7, title: "Payments", icon: "💰" },
+  { id: 8, title: "Profile", icon: "👤" },
 ];
 
 export const adminStats = [

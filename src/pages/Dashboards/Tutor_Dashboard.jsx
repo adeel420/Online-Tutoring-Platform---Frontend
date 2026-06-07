@@ -10,6 +10,7 @@ import Live_Session from "../../components/tutor_subsections/Live_Session";
 import Learning_Materials from "../../components/tutor_subsections/Learning_Materials";
 
 import Chat_Messages from "../../components/tutor_subsections/Chat_Messages";
+import useNotifications from "../../hooks/useNotifications";
 
 const tabs = [
   Dashboard,
@@ -26,8 +27,17 @@ const Tutor_Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
 
   const ActiveComponent = tabs[activeBtn];
+  const { badges, markSeen } = useNotifications();
+  const tabKeys = {
+    3: "bookings",
+    4: "sessions",
+    5: "messages",
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -66,6 +76,7 @@ const Tutor_Dashboard = () => {
               onClick={() => {
                 setActiveBtn(tab.id);
                 setSidebarOpen(false);
+                markSeen(tabKeys[tab.id]);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 activeBtn === tab.id
@@ -74,7 +85,12 @@ const Tutor_Dashboard = () => {
               }`}
             >
               <span className="text-base">{tab.icon}</span>
-              {tab.title}
+              <span className="flex-1 text-left">{tab.title}</span>
+              {badges[tabKeys[tab.id]] > 0 && (
+                <span className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                  {badges[tabKeys[tab.id]]}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -109,15 +125,23 @@ const Tutor_Dashboard = () => {
             </h2>
             <p className="text-xs text-gray-500">TutorHub Tutor Panel</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
-              A
+          {user?.profile ? (
+            <div>
+              <img
+                src={user?.profile}
+                className="h-[45px] w-[45px] rounded-full "
+                alt=""
+              />
             </div>
-          </div>
+          ) : (
+            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
+              {user?.name?.charAt(0)?.toUpperCase()}
+            </div>
+          )}
         </div>
 
         <div className="p-4 md:p-6 lg:p-8">
-          <ActiveComponent />
+          <ActiveComponent onProfileUpdate={setUser} />
         </div>
       </main>
 

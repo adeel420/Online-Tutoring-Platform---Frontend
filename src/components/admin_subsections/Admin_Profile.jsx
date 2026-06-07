@@ -7,22 +7,10 @@ const emptyProfile = {
   name: "",
   email: "",
   phone: "",
-  subject: "",
-  experience: "",
-  rate: "",
-  qualification: "",
-  location: "",
-  tags: "",
-  bio: "",
-  available: true,
   profile: "",
-  bankName: "",
-  accountTitle: "",
-  accountNumber: "",
-  iban: "",
 };
 
-const My_Profile = ({ onProfileUpdate }) => {
+const Admin_Profile = ({ onProfileUpdate }) => {
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState(emptyProfile);
   const [draft, setDraft] = useState(emptyProfile);
@@ -40,16 +28,7 @@ const My_Profile = ({ onProfileUpdate }) => {
         const { data } = await axios.get(`${apiUrl}/user/login-detail`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const nextProfile = {
-          ...emptyProfile,
-          ...data,
-          tags: Array.isArray(data.tags) ? data.tags.join(", ") : data.tags || "",
-          available: data.available ?? true,
-          bankName: data.bankDetails?.bankName || "",
-          accountTitle: data.bankDetails?.accountTitle || "",
-          accountNumber: data.bankDetails?.accountNumber || "",
-          iban: data.bankDetails?.iban || "",
-        };
+        const nextProfile = { ...emptyProfile, ...data };
         setProfile(nextProfile);
         setDraft(nextProfile);
         setProfilePreview(data.profile || "");
@@ -64,11 +43,8 @@ const My_Profile = ({ onProfileUpdate }) => {
   }, [apiUrl, token]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setDraft((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setDraft((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageFile = (e) => {
@@ -96,41 +72,15 @@ const My_Profile = ({ onProfileUpdate }) => {
     setSaving(true);
     try {
       const formData = new FormData();
-      [
-        "name",
-        "phone",
-        "subject",
-        "experience",
-        "rate",
-        "qualification",
-        "location",
-        "tags",
-        "bio",
-        "available",
-        "bankName",
-        "accountTitle",
-        "accountNumber",
-        "iban",
-      ].forEach((field) => formData.append(field, draft[field] ?? ""));
+      formData.append("name", draft.name || "");
+      formData.append("phone", draft.phone || "");
       if (profilePic) formData.append("profile", profilePic);
 
-      const { data } = await axios.put(`${apiUrl}/user/tutor/profile`, formData, {
+      const { data } = await axios.put(`${apiUrl}/user/admin/profile`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const updated = {
-        ...emptyProfile,
-        ...data.user,
-        tags: Array.isArray(data.user.tags)
-          ? data.user.tags.join(", ")
-          : data.user.tags || "",
-        available: data.user.available ?? true,
-        bankName: data.user.bankDetails?.bankName || "",
-        accountTitle: data.user.bankDetails?.accountTitle || "",
-        accountNumber: data.user.bankDetails?.accountNumber || "",
-        iban: data.user.bankDetails?.iban || "",
-      };
-
+      const updated = { ...emptyProfile, ...data.user };
       setProfile(updated);
       setDraft(updated);
       setProfilePic(null);
@@ -160,14 +110,14 @@ const My_Profile = ({ onProfileUpdate }) => {
 
   if (loading) {
     return (
-      <div className="flex min-h-[360px] items-center justify-center">
-        <Loader size={42} />
+      <div className="flex items-center justify-center py-20">
+        <Loader size={40} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="max-w-3xl space-y-5">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="h-24 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900" />
 
@@ -182,7 +132,7 @@ const My_Profile = ({ onProfileUpdate }) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  displayProfile.name?.[0] || "T"
+                  displayProfile.name?.[0] || "A"
                 )}
               </div>
               {editing && (
@@ -210,17 +160,10 @@ const My_Profile = ({ onProfileUpdate }) => {
             </button>
           </div>
 
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold text-gray-800">
-              {displayProfile.name || "Tutor Name"}
-            </h2>
-            <p className="text-purple-600 font-semibold text-sm">
-              {displayProfile.subject || "Add your subject"}
-            </p>
-            <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-              {displayProfile.bio || "Add a short bio so students can understand your teaching style."}
-            </p>
-          </div>
+          <h2 className="text-xl font-bold text-gray-800">
+            {displayProfile.name || "Admin Name"}
+          </h2>
+          <p className="text-purple-600 font-semibold text-sm">Administrator</p>
         </div>
       </div>
 
@@ -231,14 +174,9 @@ const My_Profile = ({ onProfileUpdate }) => {
             { label: "Full Name", name: "name" },
             { label: "Email", name: "email", readOnly: true },
             { label: "Phone", name: "phone" },
-            { label: "Subject", name: "subject" },
-            { label: "Experience", name: "experience" },
-            { label: "Hourly Rate", name: "rate" },
-            { label: "Qualification", name: "qualification" },
-            { label: "Location", name: "location" },
-            { label: "Specializations", name: "tags" },
+            { label: "Role", name: "role", readOnly: true },
           ].map((field) => (
-            <div key={field.name} className={field.name === "tags" ? "sm:col-span-2" : ""}>
+            <div key={field.name}>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                 {field.label}
               </label>
@@ -247,7 +185,6 @@ const My_Profile = ({ onProfileUpdate }) => {
                   name={field.name}
                   value={draft[field.name] || ""}
                   onChange={handleChange}
-                  placeholder={field.name === "tags" ? "Calculus, Algebra, Statistics" : ""}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
                 />
               ) : (
@@ -257,75 +194,6 @@ const My_Profile = ({ onProfileUpdate }) => {
               )}
             </div>
           ))}
-
-          <div className="sm:col-span-2">
-            <label className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1.5">
-              Availability
-            </label>
-            {editing ? (
-              <label className="inline-flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-xl text-sm font-medium text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="available"
-                  checked={!!draft.available}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-purple-600"
-                />
-                Available for booking
-              </label>
-            ) : (
-              <p className="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 font-medium">
-                {profile.available ? "Available for booking" : "Currently busy"}
-              </p>
-            )}
-          </div>
-
-          <div className="sm:col-span-2 pt-2 border-t border-gray-100">
-            <h4 className="font-bold text-gray-800 mb-4">Bank Details</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: "Bank Name", name: "bankName" },
-                { label: "Account Title", name: "accountTitle" },
-                { label: "Account Number", name: "accountNumber" },
-                { label: "IBAN", name: "iban" },
-              ].map((field) => (
-                <div key={field.name}>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-                    {field.label}
-                  </label>
-                  {editing ? (
-                    <input
-                      name={field.name}
-                      value={draft[field.name] || ""}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
-                    />
-                  ) : (
-                    <p className="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 font-medium min-h-[42px] break-words">
-                      {displayProfile[field.name] || "Not added yet"}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Bio</label>
-            {editing ? (
-              <textarea
-                name="bio"
-                value={draft.bio || ""}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all resize-none"
-              />
-            ) : (
-              <p className="px-3 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 leading-relaxed min-h-[86px]">
-                {profile.bio || "Not added yet"}
-              </p>
-            )}
-          </div>
         </div>
 
         {editing && (
@@ -351,4 +219,4 @@ const My_Profile = ({ onProfileUpdate }) => {
   );
 };
 
-export default My_Profile;
+export default Admin_Profile;

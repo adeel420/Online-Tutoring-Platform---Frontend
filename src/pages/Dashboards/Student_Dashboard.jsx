@@ -9,16 +9,31 @@ import Join_Session from "../../components/student_subsections/Join_Session";
 import S_Chat from "../../components/student_subsections/S_Chat";
 import S_Materials from "../../components/student_subsections/S_Materials";
 import S_Profile from "../../components/student_subsections/S_Profile";
+import useNotifications from "../../hooks/useNotifications";
 
-const tabs = [S_Dashboard, Find_Tutors, My_Bookings, Join_Session, S_Chat, S_Materials, S_Profile];
+const tabs = [
+  S_Dashboard,
+  Find_Tutors,
+  My_Bookings,
+  Join_Session,
+  S_Chat,
+  S_Materials,
+  S_Profile,
+];
 
 const Student_Dashboard = () => {
   const [activeBtn, setActiveBtn] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
-
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const ActiveComponent = tabs[activeBtn];
+  const { badges, markSeen } = useNotifications();
+  const tabKeys = {
+    2: "bookings",
+    3: "sessions",
+    4: "messages",
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -54,7 +69,11 @@ const Student_Dashboard = () => {
           {studentTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => { setActiveBtn(tab.id); setSidebarOpen(false); }}
+              onClick={() => {
+                setActiveBtn(tab.id);
+                setSidebarOpen(false);
+                markSeen(tabKeys[tab.id]);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 activeBtn === tab.id
                   ? "bg-white text-purple-700 shadow-lg"
@@ -62,7 +81,12 @@ const Student_Dashboard = () => {
               }`}
             >
               <span className="text-base">{tab.icon}</span>
-              {tab.title}
+              <span className="flex-1 text-left">{tab.title}</span>
+              {badges[tabKeys[tab.id]] > 0 && (
+                <span className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                  {badges[tabKeys[tab.id]]}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -81,7 +105,10 @@ const Student_Dashboard = () => {
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       {/* Main */}
@@ -94,9 +121,19 @@ const Student_Dashboard = () => {
             </h2>
             <p className="text-xs text-gray-500">TutorHub Student Panel</p>
           </div>
-          <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
-            S
-          </div>
+          {user?.profile ? (
+            <div>
+              <img
+                src={user?.profile}
+                className="h-[45px] w-[45px] rounded-full "
+                alt=""
+              />
+            </div>
+          ) : (
+            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
+              {user?.name?.charAt(0)?.toUpperCase()}
+            </div>
+          )}
         </div>
 
         <div className="p-4 md:p-6 lg:p-8">
@@ -111,8 +148,12 @@ const Student_Dashboard = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
               🚪
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Logout</h3>
-            <p className="text-gray-500 mb-6 text-sm">Are you sure you want to logout from the student panel?</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              Are you sure you want to logout from the student panel?
+            </p>
             <div className="flex gap-3">
               <button
                 onClick={() => navigate("/")}
