@@ -32,14 +32,14 @@ const getLocalMediaStream = async () => {
       video: true,
       audio: true,
     });
-  } catch (cameraAndMicError) {
+  } catch {
     try {
       toast("Camera unavailable. Joining with microphone only.");
       return await navigator.mediaDevices.getUserMedia({
         video: false,
         audio: true,
       });
-    } catch (audioError) {
+    } catch {
       toast("Camera and microphone unavailable. Joining in view-only mode.");
       return new MediaStream();
     }
@@ -75,6 +75,8 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
   const videoSenderRef = useRef(null);
   const seenCandidatesRef = useRef(new Set());
   const remoteDescriptionSetRef = useRef(false);
+  const signalingReadyRef = useRef(false);
+  const pendingCandidatesRef = useRef([]);
 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +96,25 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
     let pollId;
 
     const headers = { Authorization: `Bearer ${token}` };
+
+    const sendCandidate = async (sessionId, candidate) => {
+      await axios.post(
+        `${apiUrl}/class-sessions/${sessionId}/candidates`,
+        { candidate },
+        { headers },
+      );
+    };
+
+    const flushPendingCandidates = async (sessionId) => {
+      const pendingCandidates = pendingCandidatesRef.current.splice(0);
+      for (const candidate of pendingCandidates) {
+        try {
+          await sendCandidate(sessionId, candidate);
+        } catch (err) {
+          console.warn("Could not send queued ICE candidate", err);
+        }
+      }
+    };
 
     const addRemoteCandidates = async (nextSession) => {
       const candidates = nextSession?.candidates || [];
@@ -229,12 +250,15 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
 
         peer.onicecandidate = async (event) => {
           if (!event.candidate) return;
+          const candidate = event.candidate.toJSON();
+
+          if (!signalingReadyRef.current) {
+            pendingCandidatesRef.current.push(candidate);
+            return;
+          }
+
           try {
-            await axios.post(
-              `${apiUrl}/class-sessions/${sessionData._id}/candidates`,
-              { candidate: event.candidate.toJSON() },
-              { headers },
-            );
+            await sendCandidate(sessionData._id, candidate);
           } catch (err) {
             console.warn("Could not send ICE candidate", err);
           }
@@ -249,6 +273,9 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
             { headers },
           );
         }
+
+        signalingReadyRef.current = true;
+        await flushPendingCandidates(sessionData._id);
 
         pollId = setInterval(() => pollSession(sessionData._id), 2000);
         await pollSession(sessionData._id);
