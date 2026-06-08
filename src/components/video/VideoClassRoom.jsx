@@ -434,9 +434,9 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
       });
   };
 
-  const leaveClass = useCallback(async () => {
+  const leaveClass = useCallback(async (endRemote = isTutor) => {
     try {
-      if (session?._id) {
+      if (endRemote && session?._id) {
         await axios.put(
           `${apiUrl}/class-sessions/${session._id}/end`,
           {},
@@ -448,7 +448,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
     } finally {
       onLeave?.();
     }
-  }, [apiUrl, onLeave, session?._id, token]);
+  }, [apiUrl, isTutor, onLeave, session?._id, token]);
 
   useEffect(() => {
     const windowStatus = getSessionWindow(booking);
@@ -456,7 +456,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
 
     const timer = setTimeout(() => {
       toast("Class time ended.");
-      leaveClass();
+      leaveClass(true);
     }, Math.max(windowStatus.remainingMs, 1000));
 
     return () => clearTimeout(timer);
@@ -493,7 +493,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
           </span>
         </div>
         <button
-          onClick={leaveClass}
+          onClick={() => leaveClass(isTutor)}
           className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all cursor-pointer shadow"
         >
           {isTutor ? "End Class" : "Leave Class"}
