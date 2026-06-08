@@ -8,6 +8,8 @@ const DAYS = [
   "Saturday",
 ];
 
+const APP_TIME_ZONE = import.meta.env.VITE_APP_TIME_ZONE || "Asia/Karachi";
+
 export const toMinutes = (time = "") => {
   const [hours, minutes] = String(time).split(":").map(Number);
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
@@ -31,6 +33,26 @@ export const formatTimeRange12 = (from, to, fallback = "") => {
   return `${formatTime12(from)} - ${formatTime12(to)}`;
 };
 
+const getZonedNow = (now = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const value = (type) => parts.find((part) => part.type === type)?.value;
+
+  return {
+    day: value("weekday"),
+    minutes: Number(value("hour")) * 60 + Number(value("minute")),
+    seconds: Number(value("second")) || 0,
+  };
+};
+
 export const getSessionWindow = (booking, now = new Date()) => {
   const startMinutes = toMinutes(booking?.from);
   const endMinutes = toMinutes(booking?.to);
@@ -39,7 +61,8 @@ export const getSessionWindow = (booking, now = new Date()) => {
     return { state: "invalid", label: "Invalid time" };
   }
 
-  const currentDay = DAYS[now.getDay()];
+  const zonedNow = getZonedNow(now);
+  const currentDay = zonedNow.day || DAYS[now.getDay()];
   if (booking.day !== currentDay && booking.date !== currentDay) {
     return {
       state: "early",
@@ -47,7 +70,7 @@ export const getSessionWindow = (booking, now = new Date()) => {
     };
   }
 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentMinutes = zonedNow.minutes;
   if (currentMinutes < startMinutes) {
     return { state: "early", label: `Opens at ${formatTime12(booking.from)}` };
   }
@@ -58,7 +81,7 @@ export const getSessionWindow = (booking, now = new Date()) => {
   return {
     state: "open",
     label: "Join now",
-    remainingMs: (endMinutes - currentMinutes) * 60 * 1000 - now.getSeconds() * 1000,
+    remainingMs: (endMinutes - currentMinutes) * 60 * 1000 - zonedNow.seconds * 1000,
   };
 };
 
