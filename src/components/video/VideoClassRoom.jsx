@@ -601,6 +601,7 @@ const VideoClassRoom = ({ booking, role, onLeave }) => {
             : booking.tutor || session?.tutor?.name
         }
         bookingId={booking.id}
+        booking={booking}
         classSessionId={session?._id}
       />
     </div>

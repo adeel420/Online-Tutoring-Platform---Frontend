@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
-import { formatTimeRange12 } from "../../utils/time";
+import { formatDateLabel, formatTimeRange12 } from "../../utils/time";
 
 const normalizeTutor = (tutor, index = 0) => ({
   id: tutor._id || tutor.id || index,
   name: tutor.name || "Tutor",
   subject: tutor.subject || "Subject not added",
-  rating: tutor.rating || 4.5,
+  rating: Number(tutor.rating || 0),
+  ratingCount: tutor.ratingCount || 0,
   students: tutor.students || 0,
   experience: tutor.experience || "Experience not added",
   rate: tutor.rate || "Rate not added",
@@ -182,7 +183,7 @@ const Find_Tutors = () => {
               {/* Stats */}
               <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
                 <span className="flex items-center gap-1">
-                  ⭐ <strong>{tutor.rating}</strong>
+                  ⭐ <strong>{tutor.ratingCount ? tutor.rating : "New"}</strong>
                 </span>
                 <span>·</span>
                 <span>👥 {tutor.students} students</span>
@@ -261,7 +262,7 @@ const Find_Tutors = () => {
               {[
                 {
                   label: "Rating",
-                  value: `⭐ ${selected.rating}`,
+                  value: selected.ratingCount ? `⭐ ${selected.rating}/5` : "No ratings",
                   bg: "bg-yellow-50",
                 },
                 {
@@ -312,7 +313,10 @@ const Find_Tutors = () => {
                           : "border-gray-100 bg-gray-50 text-gray-600 hover:border-purple-200"
                       }`}
                     >
-                      <span className="block text-sm font-semibold">{slot.day}</span>
+                      <span className="block text-sm font-semibold">
+                        {formatDateLabel(slot.date)}
+                      </span>
+                      <span className="block text-xs text-gray-400">{slot.day}</span>
                       <span className="text-xs">
                         {formatTimeRange12(slot.from, slot.to)}
                       </span>

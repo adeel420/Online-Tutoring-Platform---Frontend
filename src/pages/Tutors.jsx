@@ -4,12 +4,14 @@ import toast from "react-hot-toast";
 import { FaSearch, FaStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../components/chatbot/Chatbot";
+import { formatDateLabel, formatTimeRange12 } from "../utils/time";
 
 const normalizeTutor = (tutor, index = 0) => ({
   id: tutor._id || tutor.id || index,
   name: tutor.name || "Tutor",
   subject: tutor.subject || "Subject not added",
-  rating: tutor.rating || 4.5,
+  rating: Number(tutor.rating || 0),
+  ratingCount: tutor.ratingCount || 0,
   students: tutor.students || 0,
   experience: tutor.experience || "Experience not added",
   rate: tutor.rate || "Rate not added",
@@ -48,7 +50,7 @@ const Tutors = () => {
         );
         const tutors = Array.isArray(data) ? data : [];
         setRemoteTutors(tutors.map(normalizeTutor));
-      } catch (err) {
+      } catch {
         setRemoteTutors([]);
       } finally {
         setLoadingTutors(false);
@@ -346,7 +348,9 @@ const Tutors = () => {
                     <div className="flex flex-wrap justify-center items-center gap-3 mb-6 text-xs sm:text-sm md:text-base text-gray-700">
                       <div className="flex items-center space-x-1">
                         <FaStar className="text-yellow-500" />
-                        <span className="font-semibold">{tutor.rating}</span>
+                        <span className="font-semibold">
+                          {tutor.ratingCount ? tutor.rating : "New"}
+                        </span>
                       </div>
                       <div>{tutor.students}+ students</div>
                       <div>{tutor.experience}</div>
@@ -431,7 +435,9 @@ const Tutors = () => {
                 {[
                   {
                     label: "Rating",
-                    value: selected.rating,
+                    value: selected.ratingCount
+                      ? `${selected.rating}/5`
+                      : "No ratings",
                     bg: "bg-yellow-50 border-yellow-100",
                   },
                   {
@@ -532,10 +538,13 @@ const Tutors = () => {
                           className="sr-only"
                         />
                         <span className="block text-sm font-bold text-gray-800">
+                          {formatDateLabel(slot.date)}
+                        </span>
+                        <span className="block text-xs text-gray-500">
                           {slot.day}
                         </span>
                         <span className="text-xs font-semibold text-purple-700">
-                          {slot.from} - {slot.to}
+                          {formatTimeRange12(slot.from, slot.to)}
                         </span>
                       </label>
                     ))}
@@ -567,7 +576,7 @@ const Tutors = () => {
                               {review.student}
                             </p>
                             <span className="text-xs text-yellow-500">
-                              {"*".repeat(review.rating)}
+                              {"★".repeat(review.rating)}
                             </span>
                           </div>
                           <p className="text-xs text-gray-500 mt-0.5">

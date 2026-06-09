@@ -10,6 +10,35 @@ const DAYS = [
 
 const APP_TIME_ZONE = import.meta.env.VITE_APP_TIME_ZONE || "Asia/Karachi";
 
+export const getTodayDate = (now = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+
+  const value = (type) => parts.find((part) => part.type === type)?.value;
+  return `${value("year")}-${value("month")}-${value("day")}`;
+};
+
+export const getDayFromDate = (date = "") => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) return "";
+  const [year, month, day] = String(date).split("-").map(Number);
+  return DAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+};
+
+export const formatDateLabel = (date = "") => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) return date;
+  const [year, month, day] = String(date).split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+};
+
 export const toMinutes = (time = "") => {
   const [hours, minutes] = String(time).split(":").map(Number);
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
@@ -63,7 +92,15 @@ export const getSessionWindow = (booking, now = new Date()) => {
 
   const zonedNow = getZonedNow(now);
   const currentDay = zonedNow.day || DAYS[now.getDay()];
-  if (booking.day !== currentDay && booking.date !== currentDay) {
+  if (booking.date && /^\d{4}-\d{2}-\d{2}$/.test(String(booking.date))) {
+    const today = getTodayDate(now);
+    if (booking.date !== today) {
+      return {
+        state: booking.date < today ? "expired" : "early",
+        label: `Opens ${formatDateLabel(booking.date)} at ${formatTime12(booking.from)}`,
+      };
+    }
+  } else if (booking.day !== currentDay && booking.date !== currentDay) {
     return {
       state: "early",
       label: `Opens ${booking.day || booking.date} at ${formatTime12(booking.from)}`,

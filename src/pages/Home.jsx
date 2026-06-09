@@ -6,7 +6,8 @@ import Chatbot from "../components/chatbot/Chatbot";
 const normalizeFeaturedTutor = (tutor) => ({
   name: tutor.name || "Tutor",
   subject: tutor.subject || "Subject not added",
-  rating: tutor.rating || 4.5,
+  rating: Number(tutor.rating || 0),
+  ratingCount: tutor.ratingCount ?? (tutor.rating ? 1 : 0),
   students: tutor.students || 0,
   experience: tutor.experience || "Experience not added",
   image: tutor.profile || tutor.image || "",
@@ -22,24 +23,13 @@ const Home = () => {
         if (data.length) {
           setHomeTutors(data.slice(0, 3).map(normalizeFeaturedTutor));
         }
-      } catch (err) {
+      } catch {
         setHomeTutors(featuredTutors);
       }
     };
 
     fetchTutors();
   }, []);
-
-  const subjects = [
-    "Mathematics",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Computer Science",
-    "English",
-    "Urdu",
-    "Economics",
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -188,7 +178,9 @@ const Home = () => {
                   <div className="flex flex-wrap justify-center items-center gap-3 mb-6 text-xs sm:text-sm md:text-base text-gray-700">
                     <div className="flex items-center space-x-1">
                       <span className="text-yellow-500">⭐</span>
-                      <span className="font-semibold">{tutor.rating}</span>
+                      <span className="font-semibold">
+                        {tutor.ratingCount ? tutor.rating : "New"}
+                      </span>
                     </div>
                     <div>{tutor.students}+ students</div>
                     <div>{tutor.experience}</div>

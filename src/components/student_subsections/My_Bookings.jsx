@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { FaStar } from "react-icons/fa";
 import Loader from "../Loader";
 import { formatTimeRange12 } from "../../utils/time";
 
@@ -15,6 +16,9 @@ const My_Bookings = () => {
   const [sessions, setSessions] = useState([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [reviewing, setReviewing] = useState(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, review: "" });
+  const [savingReview, setSavingReview] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -44,6 +48,48 @@ const My_Bookings = () => {
     upcoming: sessions.filter((s) => s.status === "upcoming").length,
     completed: sessions.filter((s) => s.status === "completed").length,
     cancelled: sessions.filter((s) => s.status === "cancelled").length,
+  };
+
+  const openReview = (session) => {
+    setReviewing(session);
+    setReviewForm({
+      rating: session.review?.rating || 5,
+      review: session.review?.review || "",
+    });
+  };
+
+  const submitReview = async () => {
+    if (!reviewing?.tutorId) return;
+    setSavingReview(true);
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_SERVER_API}/reviews/tutors/${reviewing.tutorId}`,
+        reviewForm,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.tutorId === reviewing.tutorId
+            ? {
+                ...session,
+                review: {
+                  id: data.review.id,
+                  rating: data.review.rating,
+                  review: data.review.review,
+                },
+              }
+            : session,
+        ),
+      );
+      toast.success(data.message || "Review saved.");
+      setReviewing(null);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Could not save review.");
+    } finally {
+      setSavingReview(false);
+    }
   };
 
   return (
@@ -83,12 +129,13 @@ const My_Bookings = () => {
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Amount</th>
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Payment</th>
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Status</th>
+                <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Review</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12">
+                  <td colSpan={8} className="py-12">
                     <div className="flex items-center justify-center">
                       <Loader size={36} />
                     </div>
@@ -96,7 +143,7 @@ const My_Bookings = () => {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-gray-400">
+                  <td colSpan={8} className="text-center py-10 text-gray-400">
                     No sessions found
                   </td>
                 </tr>
@@ -133,6 +180,19 @@ const My_Bookings = () => {
                         {session.status.replace("_", " ")}
                       </span>
                     </td>
+                    <td className="px-5 py-4">
+                      {session.status === "completed" &&
+                      session.paymentStatus === "paid" ? (
+                        <button
+                          onClick={() => openReview(session)}
+                          className="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-semibold hover:bg-yellow-200 transition-all cursor-pointer"
+                        >
+                          {session.review ? "Edit Review" : "Review"}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">After session</span>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -140,6 +200,61 @@ const My_Bookings = () => {
           </table>
         </div>
       </div>
+
+      {reviewing && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-800 mb-1">
+              Review {reviewing.tutor}
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">{reviewing.subject}</p>
+
+            <div className="flex gap-1 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))}
+                  className="text-2xl cursor-pointer"
+                >
+                  <FaStar
+                    className={
+                      star <= reviewForm.rating ? "text-yellow-400" : "text-gray-200"
+                    }
+                  />
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              value={reviewForm.review}
+              onChange={(event) =>
+                setReviewForm((prev) => ({ ...prev, review: event.target.value }))
+              }
+              rows={4}
+              placeholder="Write your feedback..."
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+            />
+
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={submitReview}
+                disabled={savingReview}
+                className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-60"
+              >
+                {savingReview ? "Saving..." : "Save Review"}
+              </button>
+              <button
+                onClick={() => setReviewing(null)}
+                disabled={savingReview}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-all cursor-pointer disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

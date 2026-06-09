@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
-import { formatTimeRange12, fromTime24, toTime24 } from "../../utils/time";
+import {
+  formatDateLabel,
+  formatTimeRange12,
+  getDayFromDate,
+  getTodayDate,
+} from "../../utils/time";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const HOURS = Array.from({ length: 12 }, (_, index) => String(index + 1));
-const MINUTES = ["00", "15", "30", "45"];
-const PERIODS = ["AM", "PM"];
 
-const defaultForm = { day: "Monday", from: "09:00", to: "10:00" };
+const defaultForm = { date: getTodayDate(), day: getDayFromDate(getTodayDate()), from: "09:00", to: "10:00" };
 
 const Availability_Schedule = () => {
   const [slots, setSlots] = useState([]);
@@ -42,16 +44,6 @@ const Availability_Schedule = () => {
   const handleChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleTimeChange = (field, part, value) => {
-    setForm((previous) => {
-      const timeParts = fromTime24(previous[field]);
-      return {
-        ...previous,
-        [field]: toTime24({ ...timeParts, [part]: value }),
-      };
-    });
-  };
-
   const saveSlots = async (nextSlots, successMessage) => {
     setSaving(true);
     try {
@@ -70,8 +62,13 @@ const Availability_Schedule = () => {
   };
 
   const handleSave = () => {
-    if (!form.day || !form.from || !form.to) {
+    if (!form.date || !form.from || !form.to) {
       toast.error("Please complete the slot.");
+      return;
+    }
+
+    if (form.date < getTodayDate()) {
+      toast.error("Please select today or a future date.");
       return;
     }
 
@@ -80,10 +77,11 @@ const Availability_Schedule = () => {
       return;
     }
 
+    const slotForm = { ...form, day: getDayFromDate(form.date) };
     const nextSlots =
       editId !== null
-        ? slots.map((s) => (s._id === editId ? { ...s, ...form } : s))
-        : [...slots, { ...form, isBooked: false }];
+        ? slots.map((s) => (s._id === editId ? { ...s, ...slotForm } : s))
+        : [...slots, { ...slotForm, isBooked: false }];
 
     saveSlots(nextSlots, editId !== null ? "Slot updated." : "Slot added.");
     setForm(defaultForm);
@@ -92,7 +90,12 @@ const Availability_Schedule = () => {
   };
 
   const handleEdit = (slot) => {
-    setForm({ day: slot.day, from: slot.from, to: slot.to });
+    setForm({
+      date: slot.date || getTodayDate(),
+      day: slot.day || getDayFromDate(slot.date),
+      from: slot.from,
+      to: slot.to,
+    });
     setEditId(slot._id);
     setShowForm(true);
   };
@@ -124,7 +127,7 @@ const Availability_Schedule = () => {
     <div className="space-y-5 max-w-3xl">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-800">Weekly Availability</h3>
+          <h3 className="text-lg font-bold text-gray-800">Availability Calendar</h3>
           <p className="text-sm text-gray-500">
             {slots.filter((slot) => !slot.isBooked).length} open slots,{" "}
             {slots.filter((slot) => slot.isBooked).length} booked
@@ -146,81 +149,36 @@ const Availability_Schedule = () => {
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Day</label>
-              <select
-                name="day"
-                value={form.day}
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Date</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                min={getTodayDate()}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              >
-                {DAYS.map((d) => (
-                  <option key={d}>{d}</option>
-                ))}
-              </select>
+              />
+              <p className="text-xs text-gray-400 mt-1">{getDayFromDate(form.date)}</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">From</label>
-              <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={fromTime24(form.from).hour}
-                  onChange={(event) => handleTimeChange("from", "hour", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {HOURS.map((hour) => (
-                    <option key={hour}>{hour}</option>
-                  ))}
-                </select>
-                <select
-                  value={fromTime24(form.from).minute}
-                  onChange={(event) => handleTimeChange("from", "minute", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {MINUTES.map((minute) => (
-                    <option key={minute}>{minute}</option>
-                  ))}
-                </select>
-                <select
-                  value={fromTime24(form.from).period}
-                  onChange={(event) => handleTimeChange("from", "period", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {PERIODS.map((period) => (
-                    <option key={period}>{period}</option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="time"
+                name="from"
+                value={form.from}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">To</label>
-              <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={fromTime24(form.to).hour}
-                  onChange={(event) => handleTimeChange("to", "hour", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {HOURS.map((hour) => (
-                    <option key={hour}>{hour}</option>
-                  ))}
-                </select>
-                <select
-                  value={fromTime24(form.to).minute}
-                  onChange={(event) => handleTimeChange("to", "minute", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {MINUTES.map((minute) => (
-                    <option key={minute}>{minute}</option>
-                  ))}
-                </select>
-                <select
-                  value={fromTime24(form.to).period}
-                  onChange={(event) => handleTimeChange("to", "period", event.target.value)}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {PERIODS.map((period) => (
-                    <option key={period}>{period}</option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="time"
+                name="to"
+                value={form.to}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
@@ -247,7 +205,9 @@ const Availability_Schedule = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {DAYS.map((day) => {
-          const daySlots = slots.filter((s) => s.day === day);
+          const daySlots = slots
+            .filter((s) => s.day === day)
+            .sort((a, b) => `${a.date} ${a.from}`.localeCompare(`${b.date} ${b.from}`));
           return (
             <div
               key={day}
@@ -283,6 +243,9 @@ const Availability_Schedule = () => {
                             slot.isBooked ? "text-gray-500" : "text-purple-700"
                           }`}
                         >
+                          {formatDateLabel(slot.date)}
+                        </span>
+                        <span className="block text-xs text-gray-500">
                           {formatTimeRange12(slot.from, slot.to)}
                         </span>
                         {slot.isBooked && (
