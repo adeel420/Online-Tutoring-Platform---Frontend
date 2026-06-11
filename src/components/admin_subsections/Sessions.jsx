@@ -10,6 +10,30 @@ const statusStyle = {
   cancelled: "bg-red-100 text-red-600",
 };
 
+const currencyFormatter = new Intl.NumberFormat("en-PK", {
+  maximumFractionDigits: 0,
+});
+
+const PaymentBreakdown = ({ amount = 0 }) => {
+  const total = Number(amount || 0);
+  const adminFee = total * 0.1;
+  const tutorPayout = total * 0.9;
+
+  return (
+    <div className="min-w-44 space-y-1">
+      <p className="font-bold text-gray-800">
+        Total: PKR {currencyFormatter.format(total)}
+      </p>
+      <p className="text-xs font-semibold text-orange-600">
+        Admin 10%: PKR {currencyFormatter.format(adminFee)}
+      </p>
+      <p className="text-xs text-green-600">
+        Tutor 90%: PKR {currencyFormatter.format(tutorPayout)}
+      </p>
+    </div>
+  );
+};
+
 const Sessions = () => {
   const [sessions, setSessions] = useState([]);
   const [filter, setFilter] = useState("all");
@@ -23,7 +47,7 @@ const Sessions = () => {
           `${import.meta.env.VITE_SERVER_API}/user/admin/bookings`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        setSessions(data);
+        setSessions(Array.isArray(data) ? data : []);
       } catch (err) {
         toast.error(err.response?.data?.error || "Failed to load sessions.");
       } finally {
@@ -119,8 +143,8 @@ const Sessions = () => {
                       <p>{session.date}</p>
                       <p className="text-xs text-gray-400">{session.time}</p>
                     </td>
-                    <td className="px-5 py-4 font-bold text-gray-800">
-                      {session.amount}
+                    <td className="px-5 py-4">
+                      <PaymentBreakdown amount={session.rawAmount} />
                     </td>
                     <td className="px-5 py-4 capitalize text-gray-600">
                       {session.paymentStatus}

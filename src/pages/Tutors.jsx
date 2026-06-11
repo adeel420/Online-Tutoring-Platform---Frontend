@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaSearch, FaStar } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Chatbot from "../components/chatbot/Chatbot";
+import ReadyToStart from "../components/ReadyToStart";
 import { formatDateLabel, formatTimeRange12 } from "../utils/time";
 
 const normalizeTutor = (tutor, index = 0) => ({
@@ -32,6 +33,8 @@ const normalizeTutor = (tutor, index = 0) => ({
 
 const Tutors = () => {
   const navigate = useNavigate();
+  const { subject } = useParams();
+  const subjectFilter = subject ? decodeURIComponent(subject) : "";
   const [search, setSearch] = useState("");
   const [filterAvail, setFilterAvail] = useState("all");
   const [selected, setSelected] = useState(null);
@@ -62,9 +65,15 @@ const Tutors = () => {
 
   const filteredTutors = useMemo(() => {
     const query = search.trim().toLowerCase();
+    const selectedSubject = subjectFilter.trim().toLowerCase();
 
     return remoteTutors
       .filter((tutor) => {
+        const matchSubject =
+          !selectedSubject ||
+          tutor.subject.toLowerCase().includes(selectedSubject) ||
+          tutor.tags.some((tag) => tag.toLowerCase().includes(selectedSubject));
+
         const matchSearch =
           !query ||
           tutor.name.toLowerCase().includes(query) ||
@@ -77,10 +86,10 @@ const Tutors = () => {
           (filterAvail === "available" && tutor.available) ||
           (filterAvail === "busy" && !tutor.available);
 
-        return matchSearch && matchAvail;
+        return matchSubject && matchSearch && matchAvail;
       })
       .sort((a, b) => b.rating - a.rating);
-  }, [remoteTutors, search, filterAvail]);
+  }, [remoteTutors, search, filterAvail, subjectFilter]);
 
   const openProfile = (tutor) => {
     setSelected(tutor);
@@ -209,14 +218,15 @@ const Tutors = () => {
 
         <div className="relative max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
-            Find Your Perfect
+            {subjectFilter ? `${subjectFilter} Tutors` : "Find Your Perfect"}
             <span className="block bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
-              Tutor
+              {subjectFilter ? "Available Now" : "Tutor"}
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-200 max-w-2xl mx-auto mb-10">
-            Browse Pakistan's top-rated tutors across all subjects. Filter by
-            availability, rating, and more.
+            {subjectFilter
+              ? `Browse all TutorHub teachers who teach ${subjectFilter}.`
+              : "Browse Pakistan's top-rated tutors across all subjects. Filter by availability, rating, and more."}
           </p>
 
           <div className="max-w-2xl mx-auto relative">
@@ -226,7 +236,11 @@ const Tutors = () => {
             <div className="p-[2px] rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500">
               <input
                 type="text"
-                placeholder="Search by name, subject, topic or city..."
+                placeholder={
+                  subjectFilter
+                    ? `Search within ${subjectFilter} tutors...`
+                    : "Search by name, subject, topic or city..."
+                }
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="w-full pl-12 pr-6 py-4 rounded-2xl bg-[#2a2f8a] text-white text-base focus:outline-none focus:ring-4 focus:ring-purple-300"
@@ -245,7 +259,12 @@ const Tutors = () => {
                 value: remoteTutors.filter((tutor) => tutor.available).length,
                 label: "Available Now",
               },
-              { value: "10+", label: "Subjects" },
+              {
+                value: subjectFilter
+                  ? filteredTutors.length
+                  : new Set(remoteTutors.map((tutor) => tutor.subject)).size,
+                label: subjectFilter ? `${subjectFilter} Tutors` : "Subjects",
+              },
               { value: "4.7", label: "Avg Rating" },
             ].map((stat) => (
               <div key={stat.label}>
@@ -282,6 +301,14 @@ const Tutors = () => {
                   {filter.label}
                 </button>
               ))}
+              {subjectFilter && (
+                <button
+                  onClick={() => navigate("/tutors")}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-red-50 text-red-600 hover:bg-red-100"
+                >
+                  All Subjects
+                </button>
+              )}
             </div>
           </div>
 
@@ -291,6 +318,15 @@ const Tutors = () => {
               {filteredTutors.length}
             </span>{" "}
             {loadingTutors ? "loading tutors" : "tutors"}
+            {subjectFilter && (
+              <span>
+                {" "}
+                for{" "}
+                <span className="text-purple-600 font-semibold">
+                  {subjectFilter}
+                </span>
+              </span>
+            )}
             {search && (
               <span>
                 {" "}
@@ -370,19 +406,7 @@ const Tutors = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-            Can't find the right tutor?
-          </h2>
-          <p className="text-gray-200 text-lg mb-8">
-            Tell us what you need and we'll match you with the perfect tutor.
-          </p>
-          <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-10 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer">
-            Request a Tutor
-          </button>
-        </div>
-      </section>
+      <ReadyToStart />
 
       {selected && (
         <div

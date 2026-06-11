@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { accordion, contactInfo } from "../data/Data";
 import Chatbot from "../components/chatbot/Chatbot";
 
@@ -11,6 +13,7 @@ const Contact = () => {
   });
 
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleFAQ = (index) => {
     setOpenFAQ(openFAQ === index ? null : index);
@@ -21,6 +24,24 @@ const Contact = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_SERVER_API}/contact`,
+        formData,
+      );
+      toast.success(data.message || "Message sent successfully.");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Could not send message.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -80,7 +101,7 @@ const Contact = () => {
                 hours.
               </p>
 
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {["name", "email", "subject"].map((field, i) => (
                   <div key={i}>
                     <label className="block text-sm font-medium text-gray-700 mb-2 capitalize">
@@ -115,9 +136,10 @@ const Contact = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                  disabled={submitting}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {submitting ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>
@@ -148,7 +170,7 @@ const Contact = () => {
                     },
                   ].map((item, i) => (
                     <div className="flex items-start space-x-3" key={i}>
-                      <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-8 h-6 md:w-8 md:h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
                         {item.icon}
                       </div>
                       <div>

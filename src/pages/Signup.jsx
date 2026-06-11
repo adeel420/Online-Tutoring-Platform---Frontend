@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
@@ -23,7 +23,9 @@ const roles = [
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get("role") === "teacher" ? "teacher" : "";
+  const [selectedRole, setSelectedRole] = useState(initialRole);
   const [formData, setFormData] = useState({
     name: "",
     email: "",

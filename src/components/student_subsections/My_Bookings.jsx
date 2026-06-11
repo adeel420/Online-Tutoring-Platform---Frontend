@@ -19,6 +19,9 @@ const My_Bookings = () => {
   const [reviewing, setReviewing] = useState(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, review: "" });
   const [savingReview, setSavingReview] = useState(false);
+  const [complaint, setComplaint] = useState(null);
+  const [complaintForm, setComplaintForm] = useState({ subject: "", message: "" });
+  const [submittingComplaint, setSubmittingComplaint] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -28,7 +31,7 @@ const My_Bookings = () => {
           `${import.meta.env.VITE_SERVER_API}/user/bookings`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        setSessions(data);
+        setSessions(Array.isArray(data) ? data : []);
       } catch (err) {
         toast.error(err.response?.data?.error || "Failed to load bookings.");
       } finally {
@@ -92,6 +95,38 @@ const My_Bookings = () => {
     }
   };
 
+  const openComplaint = (session) => {
+    setComplaint(session);
+    setComplaintForm({
+      subject: `Complaint about ${session.subject || "session"}`,
+      message: "",
+    });
+  };
+
+  const submitComplaint = async () => {
+    if (!complaint?.tutorId) return;
+    setSubmittingComplaint(true);
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_SERVER_API}/complaints`,
+        {
+          bookingId: complaint.id,
+          againstId: complaint.tutorId,
+          subject: complaintForm.subject,
+          message: complaintForm.message,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(data.message || "Complaint submitted.");
+      setComplaint(null);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Could not submit complaint.");
+    } finally {
+      setSubmittingComplaint(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-wrap gap-2">
@@ -130,12 +165,13 @@ const My_Bookings = () => {
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Payment</th>
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Status</th>
                 <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Review</th>
+                <th className="text-left px-5 py-3.5 font-semibold text-gray-600">Complaint</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-12">
+                  <td colSpan={9} className="py-12">
                     <div className="flex items-center justify-center">
                       <Loader size={36} />
                     </div>
@@ -143,7 +179,7 @@ const My_Bookings = () => {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-10 text-gray-400">
+                  <td colSpan={9} className="text-center py-10 text-gray-400">
                     No sessions found
                   </td>
                 </tr>
@@ -192,6 +228,14 @@ const My_Bookings = () => {
                       ) : (
                         <span className="text-xs text-gray-400">After session</span>
                       )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <button
+                        onClick={() => openComplaint(session)}
+                        className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-100 transition-all cursor-pointer"
+                      >
+                        Complaint
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -247,6 +291,52 @@ const My_Bookings = () => {
               <button
                 onClick={() => setReviewing(null)}
                 disabled={savingReview}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-all cursor-pointer disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {complaint && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-800 mb-1">
+              File Complaint
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Against {complaint.tutor} for {complaint.subject}
+            </p>
+            <input
+              value={complaintForm.subject}
+              onChange={(event) =>
+                setComplaintForm((prev) => ({ ...prev, subject: event.target.value }))
+              }
+              placeholder="Complaint subject"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 mb-3"
+            />
+            <textarea
+              value={complaintForm.message}
+              onChange={(event) =>
+                setComplaintForm((prev) => ({ ...prev, message: event.target.value }))
+              }
+              rows={4}
+              placeholder="Write complaint details..."
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+            />
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <button
+                onClick={submitComplaint}
+                disabled={submittingComplaint || !complaintForm.subject.trim() || !complaintForm.message.trim()}
+                className="flex-1 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-60"
+              >
+                {submittingComplaint ? "Submitting..." : "Submit Complaint"}
+              </button>
+              <button
+                onClick={() => setComplaint(null)}
+                disabled={submittingComplaint}
                 className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-all cursor-pointer disabled:opacity-60"
               >
                 Cancel

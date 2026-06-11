@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -19,69 +21,103 @@ const Footer = () => {
               tutoring.
             </p>
           </div>
+
           <div>
-            <h4 className="font-bold mb-4 text-lg">For Students</h4>
+            <h4 className="font-bold mb-4 text-lg">Landing Pages</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Find Tutors
-                </a>
+                <Link
+                  to="/"
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  Home
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Browse Subjects
-                </a>
+                <Link
+                  to="/tutors"
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  Tutors
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Success Stories
-                </a>
+                <Link
+                  to="/about"
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  About
+                </Link>
               </li>
             </ul>
           </div>
+
           <div>
-            <h4 className="font-bold mb-4 text-lg">For Tutors</h4>
+            <h4 className="font-bold mb-4 text-lg">Support Pages</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Become a Tutor
-                </a>
+                <Link
+                  to="/how-it-works"
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  How It Works
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Tutor Resources
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Earnings
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4 text-lg">Support</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
+                <Link
+                  to="/contact"
+                  className="hover:text-purple-400 transition-colors"
+                >
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-purple-400 transition-colors">
+                <Link
+                  to="/privacy-policy"
+                  className="hover:text-purple-400 transition-colors"
+                >
                   Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4 text-lg">Contact Info</h4>
+            <ul className="space-y-3 text-gray-400">
+              <li className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-300 flex items-center justify-center flex-shrink-0">
+                  <FaMapMarkerAlt />
+                </span>
+                <p>Lahore, Pakistan</p>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-300 flex items-center justify-center flex-shrink-0">
+                  <FaPhoneAlt />
+                </span>
+                <a
+                  href="tel:+923209430934"
+                  className="hover:text-purple-400 transition-colors"
+                >
+                  +92 320 9430934
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-300 flex items-center justify-center flex-shrink-0">
+                  <FaEnvelope />
+                </span>
+                <a
+                  href="mailto:tutorhub@gmail.com"
+                  className="hover:text-purple-400 transition-colors break-all"
+                >
+                  tutorhub@gmail.com
                 </a>
               </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 py-8 text-center text-gray-400">
-          <p>&copy; copyright by tutorhub 2025</p>
+          <p>&copy; copyright by tutorhub 2026</p>
         </div>
       </div>
     </footer>

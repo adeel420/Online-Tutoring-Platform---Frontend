@@ -9,6 +9,30 @@ const statusStyle = {
   failed: "bg-red-100 text-red-600",
 };
 
+const currencyFormatter = new Intl.NumberFormat("en-PK", {
+  maximumFractionDigits: 0,
+});
+
+const PaymentBreakdown = ({ amount = 0 }) => {
+  const total = Number(amount || 0);
+  const adminFee = total * 0.1;
+  const tutorPayout = total * 0.9;
+
+  return (
+    <div className="min-w-44 space-y-1">
+      <p className="font-bold text-gray-800">
+        Total: PKR {currencyFormatter.format(total)}
+      </p>
+      <p className="text-xs font-semibold text-orange-600">
+        Admin 10%: PKR {currencyFormatter.format(adminFee)}
+      </p>
+      <p className="text-xs text-green-600">
+        Tutor 90%: PKR {currencyFormatter.format(tutorPayout)}
+      </p>
+    </div>
+  );
+};
+
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [filter, setFilter] = useState("all");
@@ -22,7 +46,7 @@ const Payments = () => {
           `${import.meta.env.VITE_SERVER_API}/payment/admin/payments`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        setPayments(data);
+        setPayments(Array.isArray(data) ? data : []);
       } catch (err) {
         toast.error(err.response?.data?.error || "Failed to load payments.");
       } finally {
@@ -38,12 +62,34 @@ const Payments = () => {
   const paidTotal = payments
     .filter((payment) => payment.status === "paid")
     .reduce((total, payment) => total + (payment.rawAmount || 0), 0);
+  const adminFeeTotal = paidTotal * 0.1;
+  const tutorPayoutTotal = paidTotal * 0.9;
 
   return (
     <div className="space-y-5">
-      <div className="bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 rounded-2xl p-5 text-white">
-        <p className="text-white/70 text-sm mb-1">Total Paid to Admin</p>
-        <p className="text-3xl font-bold">PKR {paidTotal}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 rounded-2xl p-5 text-white">
+          <p className="text-white/70 text-sm mb-1">Total Payment Received</p>
+          <p className="text-3xl font-bold">
+            PKR {currencyFormatter.format(paidTotal)}
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-orange-100">
+          <p className="text-orange-600 text-sm font-semibold mb-1">
+            Admin Fee 10%
+          </p>
+          <p className="text-2xl font-bold text-gray-800">
+            PKR {currencyFormatter.format(adminFeeTotal)}
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+          <p className="text-green-600 text-sm font-semibold mb-1">
+            Tutor Payout 90%
+          </p>
+          <p className="text-2xl font-bold text-gray-800">
+            PKR {currencyFormatter.format(tutorPayoutTotal)}
+          </p>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-wrap gap-2">
@@ -100,8 +146,8 @@ const Payments = () => {
                     </td>
                     <td className="px-5 py-4 text-gray-600">{payment.tutor}</td>
                     <td className="px-5 py-4 text-gray-600">{payment.subject}</td>
-                    <td className="px-5 py-4 font-bold text-gray-800">
-                      {payment.amount}
+                    <td className="px-5 py-4">
+                      <PaymentBreakdown amount={payment.rawAmount} />
                     </td>
                     <td className="px-5 py-4 text-gray-500">
                       {payment.transactionRef}

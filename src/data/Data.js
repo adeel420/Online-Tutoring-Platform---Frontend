@@ -300,7 +300,7 @@ export const servicesPlans = [
 export const adminTabs = [
   { id: 0, title: "Dashboard", icon: "📊" },
   { id: 1, title: "Manage Users", icon: "👥" },
-  { id: 2, title: "Find Tutors", icon: "👨‍🏫" },
+  { id: 2, title: "All Tutors", icon: "👨‍🏫" },
   { id: 3, title: "Sessions", icon: "📅" },
   { id: 4, title: "Complaints", icon: "🚨" },
   { id: 5, title: "Reviews & Ratings", icon: "⭐" },
@@ -920,7 +920,10 @@ export const allTutors = [
     location: "Lahore",
     bio: "Experienced mathematics tutor making complex concepts simple and accessible for every student.",
     tags: ["Calculus", "Algebra", "Statistics"],
-    reviews: [{ student: "Ali H.", text: "Best math tutor ever!", rating: 5 }, { student: "Sara K.", text: "Very patient and clear.", rating: 5 }],
+    reviews: [
+      { student: "Ali H.", text: "Best math tutor ever!", rating: 5 },
+      { student: "Sara K.", text: "Very patient and clear.", rating: 5 },
+    ],
   },
   {
     id: 2,
@@ -935,7 +938,10 @@ export const allTutors = [
     location: "Islamabad",
     bio: "Full-stack developer and CS educator with 8 years of teaching experience at university level.",
     tags: ["Python", "DSA", "Web Dev"],
-    reviews: [{ student: "Bilal R.", text: "Explains DSA like a pro!", rating: 5 }, { student: "Hamza T.", text: "Amazing teacher.", rating: 5 }],
+    reviews: [
+      { student: "Bilal R.", text: "Explains DSA like a pro!", rating: 5 },
+      { student: "Hamza T.", text: "Amazing teacher.", rating: 5 },
+    ],
   },
   {
     id: 3,
@@ -950,7 +956,10 @@ export const allTutors = [
     location: "Karachi",
     bio: "Passionate English educator helping students master grammar, writing, and literary analysis.",
     tags: ["Grammar", "Writing", "Literature"],
-    reviews: [{ student: "Zara A.", text: "My writing improved a lot!", rating: 5 }, { student: "Nida M.", text: "Very engaging sessions.", rating: 4 }],
+    reviews: [
+      { student: "Zara A.", text: "My writing improved a lot!", rating: 5 },
+      { student: "Nida M.", text: "Very engaging sessions.", rating: 4 },
+    ],
   },
   {
     id: 4,
@@ -965,7 +974,10 @@ export const allTutors = [
     location: "Lahore",
     bio: "Dedicated science tutor specializing in MCAT preparation and conceptual clarity in Biology and Chemistry.",
     tags: ["Biology", "Chemistry", "MCAT"],
-    reviews: [{ student: "Fatima S.", text: "Helped me ace my MCAT!", rating: 5 }, { student: "Omar K.", text: "Great at explaining concepts.", rating: 4 }],
+    reviews: [
+      { student: "Fatima S.", text: "Helped me ace my MCAT!", rating: 5 },
+      { student: "Omar K.", text: "Great at explaining concepts.", rating: 4 },
+    ],
   },
   {
     id: 5,
@@ -980,7 +992,10 @@ export const allTutors = [
     location: "Faisalabad",
     bio: "Physics specialist with a focus on ECAT preparation, mechanics, and optics for FSc students.",
     tags: ["Mechanics", "Optics", "ECAT"],
-    reviews: [{ student: "Usman B.", text: "Physics finally makes sense!", rating: 5 }, { student: "Ayesha N.", text: "Very thorough explanations.", rating: 4 }],
+    reviews: [
+      { student: "Usman B.", text: "Physics finally makes sense!", rating: 5 },
+      { student: "Ayesha N.", text: "Very thorough explanations.", rating: 4 },
+    ],
   },
   {
     id: 6,
@@ -995,7 +1010,14 @@ export const allTutors = [
     location: "Multan",
     bio: "Economics educator with expertise in micro and macroeconomics, helping students understand real-world applications.",
     tags: ["Micro", "Macro", "Statistics"],
-    reviews: [{ student: "Raza M.", text: "Economics is now my fav subject!", rating: 5 }, { student: "Sana T.", text: "Very knowledgeable.", rating: 4 }],
+    reviews: [
+      {
+        student: "Raza M.",
+        text: "Economics is now my fav subject!",
+        rating: 5,
+      },
+      { student: "Sana T.", text: "Very knowledgeable.", rating: 4 },
+    ],
   },
   {
     id: 7,
@@ -1010,7 +1032,10 @@ export const allTutors = [
     location: "Lahore",
     bio: "Expert in Urdu literature and Islamiat with a passion for preserving cultural heritage through education.",
     tags: ["Urdu", "Islamiat", "Matric"],
-    reviews: [{ student: "Maham A.", text: "Best Urdu teacher!", rating: 5 }, { student: "Tariq H.", text: "Very inspiring.", rating: 5 }],
+    reviews: [
+      { student: "Maham A.", text: "Best Urdu teacher!", rating: 5 },
+      { student: "Tariq H.", text: "Very inspiring.", rating: 5 },
+    ],
   },
   {
     id: 8,
@@ -1025,7 +1050,10 @@ export const allTutors = [
     location: "Rawalpindi",
     bio: "Dedicated math tutor focused on building strong foundations for O/A level and FSc students.",
     tags: ["O-Level", "A-Level", "FSc"],
-    reviews: [{ student: "Haris K.", text: "Cleared all my concepts!", rating: 5 }, { student: "Laiba S.", text: "Very helpful and patient.", rating: 4 }],
+    reviews: [
+      { student: "Haris K.", text: "Cleared all my concepts!", rating: 5 },
+      { student: "Laiba S.", text: "Very helpful and patient.", rating: 4 },
+    ],
   },
   {
     id: 9,
@@ -1040,7 +1068,10 @@ export const allTutors = [
     location: "Karachi",
     bio: "Chemistry tutor specializing in organic chemistry and helping students prepare for competitive exams.",
     tags: ["Organic", "Inorganic", "MCAT"],
-    reviews: [{ student: "Zainab F.", text: "Chemistry is easy now!", rating: 5 }, { student: "Ali M.", text: "Great teaching style.", rating: 4 }],
+    reviews: [
+      { student: "Zainab F.", text: "Chemistry is easy now!", rating: 5 },
+      { student: "Ali M.", text: "Great teaching style.", rating: 4 },
+    ],
   },
 ];
 

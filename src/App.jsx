@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import HowItWorks from "./pages/HowItWorks";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Login from "./pages/Login";
@@ -20,6 +24,10 @@ import PrivateRoute from "./components/PrivateRoute";
 function App() {
   const location = useLocation();
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname]);
+
   const hidePaths = [
     "/login",
     "/signup",
@@ -31,7 +39,19 @@ function App() {
     "/student_dashboard",
   ];
 
-  const hideHeaderFooter = hidePaths.includes(location.pathname);
+  const publicPaths = [
+    "/",
+    "/about",
+    "/how-it-works",
+    "/privacy-policy",
+    "/contact",
+    "/tutors",
+  ];
+  const isKnownPath =
+    publicPaths.includes(location.pathname) ||
+    hidePaths.includes(location.pathname) ||
+    /^\/subjects\/[^/]+$/.test(location.pathname);
+  const hideHeaderFooter = hidePaths.includes(location.pathname) || !isKnownPath;
 
   return (
     <>
@@ -49,8 +69,11 @@ function App() {
         {/* Public routes */}
         <Route path="/"               element={<Home />} />
         <Route path="/about"          element={<About />} />
+        <Route path="/how-it-works"   element={<HowItWorks />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/contact"        element={<Contact />} />
         <Route path="/tutors"         element={<Tutors />} />
+        <Route path="/subjects/:subject" element={<Tutors />} />
         <Route path="/login"          element={<Login />} />
         <Route path="/signup"         element={<Signup />} />
         <Route path="/verify-email"   element={<VerifyEmail />} />
@@ -82,6 +105,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </>

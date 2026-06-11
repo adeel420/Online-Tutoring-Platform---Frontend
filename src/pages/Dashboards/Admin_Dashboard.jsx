@@ -40,12 +40,19 @@ const Admin_Dashboard = () => {
     1: "users",
     2: "tutors",
     3: "sessions",
+    4: "complaints",
     7: "payments",
     5: "reviews",
   };
 
   const handleProfileUpdate = (updatedUser) => {
     setUser(updatedUser);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   return (
@@ -134,19 +141,28 @@ const Admin_Dashboard = () => {
             </h2>
             <p className="text-xs text-gray-500">TutorHub Admin Panel</p>
           </div>
-          {user?.profile ? (
-            <div>
-              <img
-                src={user?.profile}
-                className="h-[45px] w-[45px] rounded-full "
-                alt=""
-              />
-            </div>
-          ) : (
-            <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
-              {user?.name?.charAt(0)?.toUpperCase()}
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/")}
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold hover:bg-gray-200 transition-all cursor-pointer whitespace-nowrap"
+            >
+              <span className="sm:hidden">Home</span>
+              <span className="hidden sm:inline">Back to Homepage</span>
+            </button>
+            {user?.profile ? (
+              <div>
+                <img
+                  src={user?.profile}
+                  className="h-[45px] w-[45px] rounded-full "
+                  alt=""
+                />
+              </div>
+            ) : (
+              <div className="w-9 h-9 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow">
+                {user?.name?.charAt(0)?.toUpperCase()}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="p-4 md:p-6 lg:p-8">
@@ -167,19 +183,27 @@ const Admin_Dashboard = () => {
             <p className="text-gray-500 mb-6 text-sm">
               Are you sure you want to logout from the admin panel?
             </p>
-            <div className="flex gap-3">
+            <div className="space-y-3">
               <button
-                onClick={() => navigate("/")}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2.5 rounded-xl font-semibold hover:shadow-lg transition-all cursor-pointer"
+                onClick={handleLogout}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all cursor-pointer"
               >
                 Logout
               </button>
-              <button
-                onClick={() => setShowLogout(false)}
-                className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={() => navigate("/")}
+                  className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all cursor-pointer"
+                >
+                  Back to Homepage
+                </button>
+                <button
+                  onClick={() => setShowLogout(false)}
+                  className="w-full border border-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

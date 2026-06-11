@@ -1,6 +1,58 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { aboutTeamMembers, aboutValues } from "../data/Data";
 import Chatbot from "../components/chatbot/Chatbot";
+import ReadyToStart from "../components/ReadyToStart";
+
+const AnimatedStat = ({ target, suffix = "", label, color, formatter }) => {
+  const ref = useRef(null);
+  const [value, setValue] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setStarted(true);
+      },
+      { threshold: 0.35 },
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return undefined;
+
+    let frameId;
+    const duration = 1400;
+    const startTime = performance.now();
+
+    const animate = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate);
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [started, target]);
+
+  return (
+    <div ref={ref} className="p-4 sm:p-6">
+      <div className={`text-2xl sm:text-3xl md:text-4xl font-bold ${color} mb-2`}>
+        {formatter ? formatter(value) : value}
+        {suffix}
+      </div>
+      <div className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
+        {label}
+      </div>
+    </div>
+  );
+};
 
 const About = () => {
   return (
@@ -60,38 +112,36 @@ const About = () => {
       <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 text-center">
-            <div className="p-4 sm:p-6">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-600 mb-2">
-                500+
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
-                Expert Tutors
-              </div>
-            </div>
-            <div className="p-4 sm:p-6">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mb-2">
-                10K+
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
-                Students Taught
-              </div>
-            </div>
-            <div className="p-4 sm:p-6">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-600 mb-2">
-                50+
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
-                Subjects Covered
-              </div>
-            </div>
-            <div className="p-4 sm:p-6">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-orange-600 mb-2">
-                98%
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
-                Success Rate
-              </div>
-            </div>
+            {[
+              {
+                target: 500,
+                suffix: "+",
+                label: "Expert Tutors",
+                color: "text-purple-600",
+              },
+              {
+                target: 10000,
+                suffix: "+",
+                label: "Students Taught",
+                color: "text-blue-600",
+                formatter: (value) =>
+                  value >= 10000 ? "10K" : value.toLocaleString(),
+              },
+              {
+                target: 50,
+                suffix: "+",
+                label: "Subjects Covered",
+                color: "text-green-600",
+              },
+              {
+                target: 98,
+                suffix: "%",
+                label: "Success Rate",
+                color: "text-orange-600",
+              },
+            ].map((stat) => (
+              <AnimatedStat key={stat.label} {...stat} />
+            ))}
           </div>
         </div>
       </section>
@@ -198,7 +248,8 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
+      <ReadyToStart />
+      {false && <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-40 h-40 sm:w-64 sm:h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
           <div className="absolute bottom-10 right-10 w-40 h-40 sm:w-64 sm:h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -223,7 +274,7 @@ const About = () => {
             </button>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Chatbot */}
       <Chatbot />

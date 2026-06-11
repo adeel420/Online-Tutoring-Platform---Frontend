@@ -179,13 +179,13 @@ const Tutor_Verification = () => {
             className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3"
           >
             <div
-              className={`w-10 h-10 bg-gradient-to-r ${s.color} rounded-xl flex items-center justify-center text-lg shadow`}
+              className={`w-16 h-8 md:w-10 md:h-10 bg-gradient-to-r ${s.color} rounded-xl flex items-center justify-center text-lg shadow`}
             >
               {s.icon}
             </div>
             <div>
               <p className="text-xl font-bold text-gray-800">{s.count}</p>
-              <p className="text-xs text-gray-500">{s.label}</p>
+              <p className="text-[10px] md:text-xs text-gray-500">{s.label}</p>
             </div>
           </div>
         ))}
